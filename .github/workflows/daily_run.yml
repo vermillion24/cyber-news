@@ -1,1 +1,29 @@
+name: Daily Cyber News Generator
 
+on:
+  schedule:
+    - cron: '0 9 * * *'  # Runs at 09:00 UTC every day
+  workflow_dispatch:      # Allows you to run it manually for testing
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          pip install requests google-genai feedparser resend
+
+      - name: Run news script
+        env:
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }} # Changed this
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}
+        run: python main.py
