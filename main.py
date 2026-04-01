@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from google import genai
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-
 # --- 1. CONFIGURATION & API KEYS ---
 load_dotenv()  # This loads the variables from .env into os.environ
 NEWS_API_KEY = os.environ.get('NEWS_API_KEY')
@@ -190,19 +189,67 @@ def send_email(content):
     except Exception as e:
         print(f"Resend error: {e}")
 
+
+def update_web_article(content):
+    print("Updating the live article...")
+    today_str = datetime.now().strftime('%B %d, %Y')
+    
+    # We strip the asterisks for the web view too
+    clean_content = content.replace('**', '')
+
+    html_layout = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Daily Cyber Intelligence - {today_str}</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+        <style>
+            body {{ max-width: 800px; margin: 40px auto; padding: 0 20px; }}
+            .date-stamp {{ color: #7f8c8d; font-size: 0.9em; }}
+            .content-box {{ white-space: pre-wrap; }}
+        </style>
+    </head>
+    <body>
+        <h1>🛡️ Daily Cyber Intelligence</h1>
+        <p class="date-stamp">Last Updated: {today_str}</p>
+        <hr>
+        <div class="content-box">{clean_content}</div>
+        <footer>
+            <p><small>Automated Research by CyberBot</small></p>
+        </footer>
+    </body>
+    </html>
+    """
+
+    # Save as index.html in the root folder
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(html_layout)
+    print("[+] index.html successfully updated.")
+
 # --- 5. MAIN EXECUTION ---
 if __name__ == "__main__":
-    # Step 1: Get news with new retry logic
+    from datetime import datetime
+    
+    # Step 1: Get news with retry logic
     news_items = fetch_all_sources()
     
     if not news_items:
         print("No news items found. Exiting.")
     else:
-        # Step 2: Generate content
+        print(f"[+] Collected {len(news_items)} total items.")
+        
+        # Step 2: Generate content (Gemini Call)
         article = generate_article(news_items)
         
         if article:
-            # Step 3: Send to your inbox
+            # Step 3: Action 1 - Send to your inbox for review
             send_email(article)
+            
+            # Step 4: Action 2 - Update the index.html for your website
+            update_web_article(article)
+            
+            print("[+] All tasks completed successfully.")
         else:
-            print("Failed to generate article content.")
+            print("!!! Failed to generate article content.")
