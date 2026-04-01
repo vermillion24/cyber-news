@@ -2,22 +2,20 @@ name: Daily Cyber News Automation
 
 on:
   schedule:
-    - cron: '0 9 * * *'  # Runs at 9:00 AM UTC every day
-  workflow_dispatch:      # Allows you to click a button to run it manually
+    - cron: '0 9 * * *'
+  workflow_dispatch:
 
-env:
-  # THIS LINE FIXES THE WARNING
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        # Update from @v4 to @v6
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        # Update from @v5 to @v6
+        uses: actions/setup-python@v6
         with:
           python-version: '3.10'
 
