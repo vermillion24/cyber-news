@@ -1,20 +1,21 @@
-from dotenv import load_dotenv
-load_dotenv()  # This loads the variables from .env into os.environ
 import os
 import requests
 import feedparser
 import resend
+from datetime import datetime
+from dotenv import load_dotenv
 from google import genai
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 # --- 1. CONFIGURATION & API KEYS ---
-# These are pulled from GitHub Secrets (or your local .env file)
-load_dotenv()  # Ensure this is called to load environment variables
+load_dotenv()  # This loads the variables from .env into os.environ
 NEWS_API_KEY = os.environ.get('NEWS_API_KEY')
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
 TO_EMAIL = os.environ.get('TO_EMAIL')
 
-# Initialize Resend
+# Initialize Clients
 client = genai.Client(api_key=GEMINI_API_KEY)
 resend.api_key = RESEND_API_KEY
 
@@ -28,15 +29,31 @@ RSS_FEEDS = {
     "Mandiant": "https://www.mandiant.com/resources/blog/rss.xml"
 }
 
-# --- 2. DATA FETCHING ---
+# --- 2. NEW FEATURE: RESILIENT FETCHING ---
+def get_safe_session():
+    """Creates a session that automatically retries on temporary network failures."""
+    session = requests.Session()
+    retries = Retry(
+        total=3, 
+        backoff_factor=1, 
+        status_forcelist=[429, 500, 502, 503, 504]
+    )
+    session.mount('https://', HTTPAdapter(max_retries=retries))
+    return session
+
 def fetch_all_sources():
     all_articles = []
+    session = get_safe_session()
     print("Fetching RSS feeds...")
     
     # Fetch from specific Company RSS Feeds
     for company, url in RSS_FEEDS.items():
         try:
-            feed = feedparser.parse(url)
+            # Added timeout and user-agent to prevent hanging or blocking
+            response = session.get(url, timeout=(5, 15), headers={'User-Agent': 'Mozilla/5.0'})
+            response.raise_for_status()
+            
+            feed = feedparser.parse(response.text)
             for entry in feed.entries[:3]:  # Limit to top 3 newest per source
                 all_articles.append({
                     "source": company,
@@ -48,12 +65,12 @@ def fetch_all_sources():
             print(f"Error fetching {company}: {e}")
 
     print("Fetching NewsAPI data...")
-    # Fetch broad tech news (Google, Apple, Amazon, etc.)
     query = "(Google Cloud OR AWS OR Apple Security) AND (vulnerability OR 'zero-day' OR patch)"
     news_url = f"https://newsapi.org/v2/everything?q={query}&sortBy=publishedAt&language=en&apiKey={NEWS_API_KEY}"
     
     try:
-        response = requests.get(news_url)
+        response = session.get(news_url, timeout=(5, 15))
+        response.raise_for_status()
         news_data = response.json()
         if news_data.get('status') == 'ok':
             for a in news_data.get('articles', [])[:10]:
@@ -68,15 +85,15 @@ def fetch_all_sources():
 
     return all_articles
 
-# --- 3. AI CONTENT GENERATION ---
+# --- 3. AI CONTENT GENERATION (REFINED PROMPT) ---
 def generate_article(articles):
     print("Generating article with Gemini...")
     
-    # Format the collected news for the AI
     context_text = ""
     for a in articles:
         context_text += f"SOURCE: {a['source']}\nTITLE: {a['title']}\nSUMMARY: {a['description']}\n---\n"
     
+    # Updated prompt structure for better technical clarity
     prompt = f"""
     You are a Lead Cyber Security Journalist. I have provided a list of raw news items from major tech companies.
     
@@ -96,28 +113,33 @@ def generate_article(articles):
     """
     
     try:
-        # THE FIX: Use 'gemini-1.5-flash' (no models/ prefix) with the new Client
+        # Reverted to your original model string
         response = client.models.generate_content(
             model='gemini-3-flash-preview',
             contents=prompt
         )
         return response.text
     except Exception as e:
-        # If it still fails, this will print the specific reason
         print(f"Gemini API error: {e}")
         return None
     
-# --- 4. EMAIL DELIVERY ---
+# --- 4. EMAIL DELIVERY (REFINED TEMPLATE) ---
 def send_email(content):
     print(f"Sending email to {TO_EMAIL} via Resend...")
     
-    # Simple formatting: Replace newlines with HTML breaks for the email
+    # Updated to a more readable HTML layout for your review
     html_body = f"""
-    <h2>Daily Cyber News Draft</h2>
-    <hr>
-    <div style="font-family: sans-serif; line-height: 1.6;">
-        {content.replace('\n', '<br>')}
-    </div>
+    <html>
+    <body style="font-family: sans-serif; line-height: 1.6; color: #333;">
+        <h2 style="color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px;">🛡️ Daily Cyber News Draft</h2>
+        <div style="padding: 15px; background-color: #fdfdfd; border: 1px solid #eee; border-radius: 5px;">
+            {content.replace('\n', '<br>')}
+        </div>
+        <footer style="margin-top: 20px; font-size: 0.8em; color: #999;">
+            Sent via Automation | {datetime.now().strftime('%Y-%m-%d %H:%M')}
+        </footer>
+    </body>
+    </html>
     """
     
     params = {
@@ -135,9 +157,7 @@ def send_email(content):
 
 # --- 5. MAIN EXECUTION ---
 if __name__ == "__main__":
-    from datetime import datetime
-    
-    # Step 1: Get news
+    # Step 1: Get news with new retry logic
     news_items = fetch_all_sources()
     
     if not news_items:
