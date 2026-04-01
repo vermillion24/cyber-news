@@ -2,19 +2,20 @@ name: Daily Cyber News Automation
 
 on:
   schedule:
-    - cron: '0 9 * * *'
+    - cron: '0 5 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        # Update from @v4 to @v6
         uses: actions/checkout@v6
 
       - name: Set up Python
-        # Update from @v5 to @v6
         uses: actions/setup-python@v6
         with:
           python-version: '3.12'
@@ -31,3 +32,11 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
         run: python main.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add index.html
+          git commit -m "Update Daily Briefing: $(date +'%Y-%m-%d')" || exit 0
+          git push
