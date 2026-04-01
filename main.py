@@ -27,6 +27,10 @@ RSS_FEEDS = {
     "Cisco Talos": "https://blog.talosintelligence.com/feeds/posts/default",
     "Microsoft Security": "https://www.microsoft.com/en-us/security/blog/feed/",
     "Mandiant": "https://www.mandiant.com/resources/blog/rss.xml"
+    "https://www.cisa.gov/cybersecurity-advisories/all.xml"
+    "https://www.bleepingcomputer.com/feed/"
+    "https://krebsonsecurity.com/feed/"
+    "https://feeds.feedburner.com/TheHackersNews"
 }
 
 # --- 2. NEW FEATURE: RESILIENT FETCHING ---
@@ -65,7 +69,7 @@ def fetch_all_sources():
             print(f"Error fetching {company}: {e}")
 
     print("Fetching NewsAPI data...")
-    query = "(Google Cloud OR AWS OR Apple Security) AND (vulnerability OR 'zero-day' OR patch)"
+    query = "(cybersecurity OR 'data breach' OR ransomware OR 'zero-day' OR malware) AND (vulnerability OR patch OR exploit)"
     news_url = f"https://newsapi.org/v2/everything?q={query}&sortBy=publishedAt&language=en&apiKey={NEWS_API_KEY}"
     
     try:
