@@ -5,6 +5,10 @@ on:
     - cron: '0 9 * * *'  # Runs at 9:00 AM UTC every day
   workflow_dispatch:      # Allows you to click a button to run it manually
 
+env:
+  # THIS LINE FIXES THE WARNING
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  
 jobs:
   build:
     runs-on: ubuntu-latest
