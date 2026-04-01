@@ -131,17 +131,44 @@ def generate_article(articles):
 def send_email(content):
     print(f"Sending email to {TO_EMAIL} via Resend...")
     
-    # Updated to a more readable HTML layout for your review
+    # Get current date for the subject and header
+    today_str = datetime.now().strftime('%B %d, %Y')
+    
+    # This template creates a professional "Newsletter" feel in your inbox
     html_body = f"""
+    <!DOCTYPE html>
     <html>
-    <body style="font-family: sans-serif; line-height: 1.6; color: #333;">
-        <h2 style="color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px;">🛡️ Daily Cyber News Draft</h2>
-        <div style="padding: 15px; background-color: #fdfdfd; border: 1px solid #eee; border-radius: 5px;">
-            {content.replace('\n', '<br>')}
+    <head>
+        <style>
+            body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f4f7f6; margin: 0; padding: 20px; }}
+            .container {{ max-width: 700px; margin: auto; background: #ffffff; padding: 30px; border-radius: 10px; border: 1px solid #e1e4e8; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }}
+            .header {{ border-bottom: 3px solid #2c3e50; padding-bottom: 15px; margin-bottom: 25px; }}
+            .header h2 {{ color: #2c3e50; margin: 0; font-size: 24px; }}
+            .header span {{ color: #7f8c8d; font-size: 14px; }}
+            .content-box {{ white-space: pre-wrap; font-size: 16px; color: #2c3e50; }}
+            .footer {{ margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; font-size: 12px; color: #95a5a6; text-align: center; }}
+            .action-hint {{ background: #fff3cd; border-left: 5px solid #ffecb5; padding: 10px; margin-top: 20px; font-size: 14px; font-style: italic; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2>🛡️ Cyber Intelligence Draft</h2>
+                <span>Generated for: {today_str}</span>
+            </div>
+            
+            <div class="content-box">
+                {content}
+            </div>
+
+            <div class="action-hint">
+                <strong>Reviewer Note:</strong> This draft was compiled from Cloudflare, Fortinet, Oracle, and NewsAPI. Review for technical accuracy before publishing to the site.
+            </div>
+
+            <div class="footer">
+                Automated Cyber News System | Powered by Gemini-3-Flash & GitHub Actions
+            </div>
         </div>
-        <footer style="margin-top: 20px; font-size: 0.8em; color: #999;">
-            Sent via Automation | {datetime.now().strftime('%Y-%m-%d %H:%M')}
-        </footer>
     </body>
     </html>
     """
@@ -149,7 +176,7 @@ def send_email(content):
     params = {
         "from": "CyberBot <onboarding@resend.dev>",
         "to": [TO_EMAIL],
-        "subject": f"Draft: Cyber News for {datetime.now().strftime('%Y-%m-%d')}",
+        "subject": f"DRAFT: Cyber Briefing - {today_str}",
         "html": html_body
     }
 
