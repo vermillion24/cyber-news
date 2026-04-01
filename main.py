@@ -22,15 +22,13 @@ resend.api_key = RESEND_API_KEY
 # List of high-value Security RSS feeds
 RSS_FEEDS = {
     "Cloudflare": "https://blog.cloudflare.com/rss/",
-    "Fortinet": "https://www.fortinet.com/rss/threat-research.xml",
-    "Oracle": "https://blogs.oracle.com/security/rss",
-    "Cisco Talos": "https://blog.talosintelligence.com/feeds/posts/default",
+    "Fortinet": "https://www.fortinet.com/blog/rss-feeds/psirt-blogs.xml",
+    "Cisco Talos": "https://blog.talosintelligence.com/rss/",
     "Microsoft Security": "https://www.microsoft.com/en-us/security/blog/feed/",
-    "Mandiant": "https://www.mandiant.com/resources/blog/rss.xml"
-    "https://www.cisa.gov/cybersecurity-advisories/all.xml"
-    "https://www.bleepingcomputer.com/feed/"
-    "https://krebsonsecurity.com/feed/"
-    "https://feeds.feedburner.com/TheHackersNews"
+    "CISA Advisories": "https://www.cisa.gov/cybersecurity-advisories/all.xml",
+    "BleepingComputer": "https://www.bleepingcomputer.com/feed/",
+    "The Hacker News": "https://feeds.feedburner.com/TheHackersNews",
+    "Krebs on Security": "https://krebsonsecurity.com/feed/"
 }
 
 # --- 2. NEW FEATURE: RESILIENT FETCHING ---
@@ -54,7 +52,8 @@ def fetch_all_sources():
     for company, url in RSS_FEEDS.items():
         try:
             # Added timeout and user-agent to prevent hanging or blocking
-            response = session.get(url, timeout=(5, 15), headers={'User-Agent': 'Mozilla/5.0'})
+            response = session.get(url, timeout=(5, 15), headers={
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'})
             response.raise_for_status()
             
             feed = feedparser.parse(response.text)
