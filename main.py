@@ -91,29 +91,33 @@ def generate_article(articles):
     
     context_text = ""
     for a in articles:
-        context_text += f"SOURCE: {a['source']}\nTITLE: {a['title']}\nSUMMARY: {a['description']}\n---\n"
+        context_text += f"SOURCE: {a['source']}\nTITLE: {a['title']}\nSUMMARY: {a['description']}\nLINK: {a['link']}\n---\n"
     
-    # Updated prompt structure for better technical clarity
+    # NEW REFINED PROMPT
     prompt = f"""
-    You are a Lead Cyber Security Journalist. I have provided a list of raw news items from major tech companies.
+    ROLE: You are a Senior Cyber Security Researcher and Technical Journalist.
     
-    TASK: Write a cohesive Daily Cyber News Briefing for my website.
+    TASK: Analyze the provided raw data and write a 'Daily Cyber Intelligence Brief' for a technical audience.
+    
+    CONSTRAINTS:
+    - DO NOT use marketing fluff or "corporate speak."
+    - DO NOT summarize articles that are just product advertisements.
+    - FOCUS on vulnerabilities, exploits, patches, and threat actor activity.
+    - If a CVE ID is mentioned in the data, it MUST be included in the summary.
     
     STRUCTURE:
-    1. A bold, engaging main headline for the day.
-    2. 'The Big Story': Choose the most impactful incident and write 3 detailed paragraphs.
-    3. 'Vendor Watch': Summarize specific updates/patches from companies like Cloudflare, Fortinet, or Oracle.
-    4. 'Brief Headlines': A bulleted list of other notable tech news.
-    5. 'Expert Take': A 2-sentence summary of what IT admins should prioritize today.
+    1. **Main Headline**: A single, high-impact headline for today's most critical news.
+    2. **The Big Story**: Select the most technically significant event. Write 3 detailed paragraphs explaining the vulnerability, who is at risk, and the technical mechanism of the threat.
+    3. **Vendor Security Watch**: Provide a bulleted list for updates from Cloudflare, Fortinet, Oracle, Cisco, and Microsoft. Each bullet should mention the specific product and the fix.
+    4. **Critical Headlines**: 3-5 short bullets on other notable security news.
+    5. **Admin Priority List**: A 'TL;DR' list of 3 specific actions (e.g., "Patch FortiOS to v7.x immediately").
 
-    Use professional, technical, yet clear language. Format with clear headings.
-
-    RAW DATA:
+    RAW DATA FOR ANALYSIS:
     {context_text}
     """
     
     try:
-        # Reverted to your original model string
+        # Keeping your original model as requested
         response = client.models.generate_content(
             model='gemini-3-flash-preview',
             contents=prompt
