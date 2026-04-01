@@ -133,6 +133,7 @@ def generate_article(articles):
 # --- 4. EMAIL DELIVERY (REFINED TEMPLATE) ---
 def send_email(content):
     print(f"Sending email to {TO_EMAIL} via Resend...")
+    clean_content = content.replace('**', '')
     
     # Get current date for the subject and header
     today_str = datetime.now().strftime('%B %d, %Y')
