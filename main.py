@@ -104,6 +104,9 @@ def generate_article(articles):
     - DO NOT summarize articles that are just product advertisements.
     - FOCUS on vulnerabilities, exploits, patches, and threat actor activity.
     - If a CVE ID is mentioned in the data, it MUST be included in the summary.
+    - DO NOT use Markdown formatting (no asterisks like **bold**).
+    - Use plain text for the content, as it will be formatted via HTML later.
+    - DO NOT use marketing fluff... (rest of your constraints)
     
     STRUCTURE:
     1. **Main Headline**: A single, high-impact headline for today's most critical news.
