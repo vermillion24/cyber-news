@@ -104,16 +104,13 @@ def generate_article(articles):
     - DO NOT summarize articles that are just product advertisements.
     - FOCUS on vulnerabilities, exploits, patches, and threat actor activity.
     - If a CVE ID is mentioned in the data, it MUST be included in the summary.
-    - DO NOT use Markdown formatting (no asterisks like **bold**).
-    - Use plain text for the content, as it will be formatted via HTML later.
-    - DO NOT use marketing fluff... (rest of your constraints)
     
     STRUCTURE:
-    1. **Main Headline**: A single, high-impact headline for today's most critical news.
-    2. **The Big Story**: Select the most technically significant event. Write 3 detailed paragraphs explaining the vulnerability, who is at risk, and the technical mechanism of the threat.
-    3. **Vendor Security Watch**: Provide a bulleted list for updates from Cloudflare, Fortinet, Oracle, Cisco, and Microsoft. Each bullet should mention the specific product and the fix.
-    4. **Critical Headlines**: 3-5 short bullets on other notable security news.
-    5. **Admin Priority List**: A 'TL;DR' list of 3 specific actions (e.g., "Patch FortiOS to v7.x immediately").
+    1. Main Headline: A single, high-impact headline for today's most critical news.
+    2. The Big Story: Select the most technically significant event. Write 3 detailed paragraphs explaining the vulnerability, who is at risk, and the technical mechanism of the threat.
+    3. Vendor Security Watch: Provide a bulleted list for updates from Cloudflare, Fortinet, Oracle, Cisco, and Microsoft. Each bullet should mention the specific product and the fix.
+    4. Critical Headlines: 3-5 short bullets on other notable security news.
+    5. Admin Priority List: A 'TL;DR' list of 3 specific actions (e.g., "Patch FortiOS to v7.x immediately").
 
     RAW DATA FOR ANALYSIS:
     {context_text}
