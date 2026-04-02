@@ -2,6 +2,8 @@ import os
 import requests
 import feedparser
 import resend
+import time
+import random
 from datetime import datetime
 from dotenv import load_dotenv
 from google import genai
@@ -117,17 +119,25 @@ def generate_article(articles):
     RAW DATA FOR ANALYSIS:
     {context_text}
     """
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model='gemini-3-flash-preview',
+                contents=prompt
+            )
+            return response.text
+        except Exception as e:
+            # If it's a 503 (Overloaded) error, wait and try again
+            if "503" in str(e) or "unavailable" in str(e).lower():
+                wait_time = (2 ** attempt) + random.random()
+                print(f"[-] Gemini overloaded. Retrying in {wait_time:.2f} seconds...")
+                time.sleep(wait_time)
+            else:
+                print(f"[-] Permanent Gemini Error: {e}")
+                return None
     
-    try:
-        # Keeping your original model as requested
-        response = client.models.generate_content(
-            model='gemini-3-flash-preview',
-            contents=prompt
-        )
-        return response.text
-    except Exception as e:
-        print(f"Gemini API error: {e}")
-        return None
+    print("[-] Failed to generate article after 3 attempts due to 503 errors.")
+    return None
     
 # --- 4. EMAIL DELIVERY (REFINED TEMPLATE) ---
 def send_email(content):
