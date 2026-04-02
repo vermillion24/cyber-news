@@ -199,52 +199,42 @@ def send_email(content):
     except Exception as e:
         print(f"Resend error: {e}")
 
+import os
+from datetime import datetime
+
 def update_web_article(content):
-    print("Archiving the article and updating the home page...")
-    os.makedirs('news', exist_ok=True)
+    print("Generating Professional Markdown Post...")
+    
+    # 1. Hugo looks in content/posts/ for your news
+    os.makedirs('content/posts', exist_ok=True)
     
     now = datetime.now()
     date_str = now.strftime('%Y-%m-%d')
-    display_date = now.strftime('%B %d, %Y')
-    daily_filename = f"news/{date_str}.html"
+    file_path = f"content/posts/{date_str}.md"
     
-    github_repo = "vermillion24/cyber-news"
-    linkedin_url = "https://www.linkedin.com/in/YOUR_PROFILE" 
+    # 2. The "Front Matter" (The block between ---)
+    # This tells Hugo the Title and Date of the post
+    markdown_output = f"""---
+title: "Cyber Intel Brief: {now.strftime('%B %d, %Y')}"
+date: "{now.isoformat()}"
+author: "CyberBot"
+draft: false
+toc: true
+---
 
-    # Note the DOUBLE curly braces {{ }} below for CSS!
-    style_block = """
-    <style>
-        body {{ max-width: 900px; margin: 40px auto; background-color: #111; color: #eee; line-height: 1.6; padding: 0 20px; }}
-        h1, h2 {{ color: #00ff41; font-family: 'Courier New', Courier, monospace; }}
-        header {{ border-bottom: 1px solid #444; margin-bottom: 20px; }}
-        footer {{ margin-top: 50px; border-top: 1px solid #444; padding-top: 20px; }}
-        a {{ color: #3498db; }}
-        .content-box {{ white-space: pre-wrap; background: #1a1a1a; padding: 20px; border-radius: 8px; border: 1px solid #333; }}
-    </style>
-    """
+{content}
 
-    # --- ARCHIVE PAGE ---
-    daily_html = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Intel Brief - {display_date}</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
-        {style_block}
-    </head>
-    <body>
-        <header>
-            <nav><a href="../index.html">⬅ Back to Archive</a></nav>
-            <h1>🛡️ Briefing: {display_date}</h1>
-        </header>
-        <main class="content-box">{content.replace('**', '')}</main>
-    </body>
-    </html>
-    """
-    
-    with open(daily_filename, "w", encoding="utf-8") as f:
-        f.write(daily_html)
+---
+### 📬 Subscribe & Connect
+Stay updated on the latest threats. 
+[View GitHub Repo](https://github.com/vermillion24/cyber-news) | [LinkedIn](https://www.linkedin.com/in/YOUR_PROFILE)
+"""
+
+    # 3. Write the file
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(markdown_output)
+        
+    print(f"[+] Saved successfully to {file_path}")
 
     # --- HOME PAGE ---
     index_html = f"""
