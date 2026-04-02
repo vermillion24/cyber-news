@@ -3,54 +3,31 @@
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Daily Cyber Intelligence - April 02, 2026</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
-        <style>
-            body { max-width: 800px; margin: 40px auto; padding: 0 20px; }
-            .date-stamp { color: #7f8c8d; font-size: 0.9em; }
-            .content-box { white-space: pre-wrap; }
-        </style>
+        <title>Cyber Intelligence Archive</title>
+        <link rel="stylesheet" href="https://unpkg.com/@mvpcss/vars/index.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mvpcss/reboot/reboot.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mvpcss/core/core.css">
     </head>
     <body>
-        <h1>🛡️ Daily Cyber Intelligence</h1>
-        <p class="date-stamp">Last Updated: April 02, 2026</p>
-        <hr>
-        <div class="content-box">Daily Cyber Intelligence Brief
-Date: April 1, 2026
-Analyst: Senior Security Researcher
-
----
-
-### 1. Main Headline: North Korean "Sapphire Sleet" Compromises Axios NPM Packages in Massive Supply Chain Attack
-
-### 2. The Big Story: Axios Dependency Poisoning
-On March 31, 2026, the North Korean state-sponsored threat actor Sapphire Sleet successfully compromised the supply chain for Axios, one of the most widely used JavaScript HTTP clients. The attackers published two malicious versions to the npm registry: v1.14.1 and v0.30.4. These packages were configured to initiate a multi-stage infection chain that downloads payloads from a remote Command and Control (C2) server.
-
-The threat covers a massive surface area; Axios is a foundational dependency for millions of web applications and microservices. Any automated CI/CD pipeline or developer environment that pulled the latest minor or patch version during the exposure window is compromised. While the malicious packages have been removed from npm, the focus now shifts to incident response for organizations that may have already integrated the tainted code into their production environments.
-
-Technically, the malicious versions functioned as a downloader. Upon installation or execution, the scripts established a connection to Sapphire Sleet's infrastructure. This mechanism is consistent with North Korean "Lazarus-linked" tactics aimed at infiltrating corporate networks to facilitate either financial theft or intellectual property espionage. Organizations are advised to audit their `package-lock.json` files and build artifacts for the presence of the affected versions immediately.
-
-### 3. Vendor Security Watch
-*   Microsoft: Issued mitigation guidance for the Axios npm compromise. Separately, Microsoft identified a new VBS-based malware campaign spreading via WhatsApp that leverages a UAC bypass to establish persistence on Windows systems.
-*   Cisco: Talos researchers disclosed the discovery and subsequent patching of 30 vulnerabilities across consumer and enterprise hardware, including 10 flaws in TP-Link devices, 1 in HikVision firmware, and 19 within the Canva platform. 
-*   Cloudflare: Released Programmable Flow Protection for Magic Transit. This update allows customers to deploy custom, stateful DDoS mitigation logic for proprietary UDP protocols directly at the network edge.
-*   Fortinet / Oracle: No critical security updates or vulnerability disclosures reported in today’s dataset.
-
-### 4. Critical Headlines
-*   Apple Issues Urgent iOS 18 Updates: Apple has expanded security patches for iOS 18 to older iPhone models to mitigate the "DarkSword" exploit kit, which is currently being observed in active, targeted attacks.
-*   TrueConf Zero-Day Exploited: Threat actors are actively exploiting a zero-day vulnerability in TrueConf conference servers to push malicious software updates and execute arbitrary files on all connected endpoints.
-*   "CanisterWorm" Wiper Targeting Iran: A new worm-based wiper is spreading through misconfigured cloud services. The malware selectively wipes data on systems where the default language is set to Farsi or the system time zone is set to Iran.
-*   Global IoT Botnet Takedown: Federal authorities disrupted the infrastructure for four major botnets—Aisuru, Kimwolf, JackSkid, and Mossad—which controlled over three million compromised IoT devices used for record-breaking DDoS attacks.
-*   CERT-UA Impersonation: The UAC-0255 threat group is distributing AGEWHEEZE malware via phishing emails that impersonate the Computer Emergency Response Team of Ukraine, reaching approximately one million recipients.
-
-### 5. Admin Priority List
-1.  Remediate Axios Dependencies: Audit all JavaScript projects for Axios versions 1.14.1 and 0.30.4. Roll back to a known-good version (e.g., 1.14.0) and rotate any environment variables or secrets that were present in compromised build environments.
-2.  Patch TrueConf Infrastructure: If utilizing TrueConf for enterprise communication, apply the latest emergency patches immediately to prevent arbitrary remote code execution on endpoints.
-3.  Update iOS Fleet: Ensure all iOS 18 devices are updated to the latest build to block the DarkSword exploit kit. Prioritize users with high-value access or those in sensitive roles.</div>
-        <footer>
-            <p><small>Automated Research by CyberBot</small></p>
-        </footer>
+        <header>
+            <h1>🛡️ Cyber Intelligence Hub</h1>
+            <p>Automated daily threat research and vulnerability analysis.</p>
+        </header>
+        <main>
+            <section>
+                <h2>Latest Briefing</h2>
+                <p>Read the most recent update: <a href="news/2026-04-02.html">Update for April 02, 2026</a></p>
+            </section>
+            <hr>
+            <footer>
+                <h3>Connect & Support</h3>
+                <p>
+                    <a href="https://www.linkedin.com/in/YOUR_PROFILE">LinkedIn Profile</a> | 
+                    <a href="https://github.com/vermillion24/cyber-news">View on GitHub</a>
+                </p>
+                <iframe src="https://ghbtns.com/github-btn.html?user=vermillion24&repo=cyber-news&type=star&count=true&size=large" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
+            </footer>
+        </main>
     </body>
     </html>
     
