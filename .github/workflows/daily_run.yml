@@ -37,6 +37,9 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add index.html
-          git commit -m "Update Daily Briefing: $(date +'%Y-%m-%d')" || exit 0
+          
+          # Add the new html file in news/ AND the updated index.html
+          git add index.html news/
+          
+          git commit -m "Archive update: $(date +'%Y-%m-%d')" || exit 0
           git push
