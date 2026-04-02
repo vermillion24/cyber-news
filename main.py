@@ -201,47 +201,44 @@ def send_email(content):
 
 def update_web_article(content):
     print("Archiving the article and updating the home page...")
+    os.makedirs('news', exist_ok=True)
     
-    # Setup dates and paths
     now = datetime.now()
     date_str = now.strftime('%Y-%m-%d')
     display_date = now.strftime('%B %d, %Y')
-    
-    # 1. Ensure the news directory exists
-    if not os.path.exists('news'):
-        os.makedirs('news')
-    
-    # 2. Create the unique daily file (The Archive)
-    # We use MVP.css here for a clean, professional look
     daily_filename = f"news/{date_str}.html"
-    clean_content = content.replace('**', '')
+    
+    github_repo = "vermillion24/cyber-news"
+    linkedin_url = "https://www.linkedin.com/in/YOUR_PROFILE" 
 
+    # Note the DOUBLE curly braces {{ }} below for CSS!
+    style_block = """
+    <style>
+        body {{ max-width: 900px; margin: 40px auto; background-color: #111; color: #eee; line-height: 1.6; padding: 0 20px; }}
+        h1, h2 {{ color: #00ff41; font-family: 'Courier New', Courier, monospace; }}
+        header {{ border-bottom: 1px solid #444; margin-bottom: 20px; }}
+        footer {{ margin-top: 50px; border-top: 1px solid #444; padding-top: 20px; }}
+        a {{ color: #3498db; }}
+        .content-box {{ white-space: pre-wrap; background: #1a1a1a; padding: 20px; border-radius: 8px; border: 1px solid #333; }}
+    </style>
+    """
+
+    # --- ARCHIVE PAGE ---
     daily_html = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Cyber Intel - {display_date}</title>
+        <title>Intel Brief - {display_date}</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
-        <style>
-            /* Adding a tiny bit of custom 'Cyber' flair */
-            body { max-width: 900px; line-height: 1.6; }
-            h1, h2 { color: #00ff41; font-family: 'Courier New', Courier, monospace; } /* Matrix Green headers */
-            header { border-bottom: 1px solid #444; margin-bottom: 20px; }
-            footer { margin-top: 50px; border-top: 1px solid #444; padding-top: 20px; }
-            a { color: #3498db; }
-        </style>
+        {style_block}
     </head>
     <body>
         <header>
-            <nav>
-                <a href="../index.html">⬅ Back to Home</a>
-            </nav>
-            <h1>🛡️ Intel Briefing: {display_date}</h1>
+            <nav><a href="../index.html">⬅ Back to Archive</a></nav>
+            <h1>🛡️ Briefing: {display_date}</h1>
         </header>
-        <main>
-            <section style="white-space: pre-wrap;">{clean_content}</section>
-        </main>
+        <main class="content-box">{content.replace('**', '')}</main>
     </body>
     </html>
     """
@@ -249,45 +246,32 @@ def update_web_article(content):
     with open(daily_filename, "w", encoding="utf-8") as f:
         f.write(daily_html)
 
-    # 3. Update index.html (The Home Page / Master List)
-    # We add your LinkedIn and GitHub Star button here
-    github_repo = "vermillion24/cyber-news"
-    linkedin_url = "https://www.linkedin.com/in/YOUR_PROFILE" # Update this!
-
+    # --- HOME PAGE ---
     index_html = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Cyber Intelligence Archive</title>
+        <title>Cyber Intelligence Hub</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
-        <style>
-            /* Adding a tiny bit of custom 'Cyber' flair */
-            body { max-width: 900px; line-height: 1.6; }
-            h1, h2 { color: #00ff41; font-family: 'Courier New', Courier, monospace; } /* Matrix Green headers */
-            header { border-bottom: 1px solid #444; margin-bottom: 20px; }
-            footer { margin-top: 50px; border-top: 1px solid #444; padding-top: 20px; }
-            a { color: #3498db; }
-        </style>
+        {style_block}
     </head>
     <body>
         <header>
             <h1>🛡️ Cyber Intelligence Hub</h1>
-            <p>Automated daily threat research and vulnerability analysis.</p>
+            <p>Automated research and vulnerability analysis.</p>
         </header>
         <main>
-            <section>
+            <section class="content-box">
                 <h2>Latest Briefing</h2>
-                <p>Read the most recent update: <a href="{daily_filename}">Update for {display_date}</a></p>
+                <p>Most recent update: <a href="{daily_filename}">Analysis for {display_date}</a></p>
             </section>
-            <hr>
             <footer>
-                <h3>Connect & Support</h3>
                 <p>
-                    <a href="{linkedin_url}">LinkedIn Profile</a> | 
-                    <a href="https://github.com/{github_repo}">View on GitHub</a>
+                    <a href="{linkedin_url}">LinkedIn</a> | 
+                    <a href="https://github.com/{github_repo}">GitHub Repo</a>
                 </p>
-                <iframe src="https://ghbtns.com/github-btn.html?user={github_repo.split('/')[0]}&repo={github_repo.split('/')[1]}&type=star&count=true&size=large" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
+                <iframe src="https://ghbtns.com/github-btn.html?user={github_repo.split('/')[0]}&repo={github_repo.split('/')[1]}&type=star&count=true&size=large" frameborder="0" scrolling="0" width="170" height="30"></iframe>
             </footer>
         </main>
     </body>
