@@ -273,7 +273,7 @@ def update_web_article(content):
                 <h3>Connect & Support</h3>
                 <p>
                     <a href="{linkedin_url}">LinkedIn Profile</a> | 
-                    <a href="https://github.com/{cyber-news}">View on GitHub</a>
+                    <a href="https://github.com/{github_repo}">View on GitHub</a>
                 </p>
                 <iframe src="https://ghbtns.com/github-btn.html?user={github_repo.split('/')[0]}&repo={github_repo.split('/')[1]}&type=star&count=true&size=large" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
             </footer>
