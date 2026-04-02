@@ -235,41 +235,6 @@ Stay updated on the latest threats.
         f.write(markdown_output)
         
     print(f"[+] Saved successfully to {file_path}")
-
-    # --- HOME PAGE ---
-    index_html = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Cyber Intelligence Hub</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
-        {style_block}
-    </head>
-    <body>
-        <header>
-            <h1>🛡️ Cyber Intelligence Hub</h1>
-            <p>Automated research and vulnerability analysis.</p>
-        </header>
-        <main>
-            <section class="content-box">
-                <h2>Latest Briefing</h2>
-                <p>Most recent update: <a href="{daily_filename}">Analysis for {display_date}</a></p>
-            </section>
-            <footer>
-                <p>
-                    <a href="{linkedin_url}">LinkedIn</a> | 
-                    <a href="https://github.com/{github_repo}">GitHub Repo</a>
-                </p>
-                <iframe src="https://ghbtns.com/github-btn.html?user={github_repo.split('/')[0]}&repo={github_repo.split('/')[1]}&type=star&count=true&size=large" frameborder="0" scrolling="0" width="170" height="30"></iframe>
-            </footer>
-        </main>
-    </body>
-    </html>
-    """
-    
-    with open("index.html", "w", encoding="utf-8") as f:
-        f.write(index_html)
         
 # --- 5. MAIN EXECUTION ---
 if __name__ == "__main__":
@@ -287,12 +252,13 @@ if __name__ == "__main__":
         article = generate_article(news_items)
         
         if article:
-            # Step 3: Action 1 - Send to your inbox for review
+            # Step 3: Send to your inbox (Newsletter/Notification)
             send_email(article)
             
-            # Step 4: Action 2 - Update the index.html for your website
+            # Step 4: Generate the Markdown post for Hugo
+            # This triggers the function we just cleaned up
             update_web_article(article)
             
-            print("[+] All tasks completed successfully.")
+            print("[+] All tasks completed successfully. Ready for Hugo build.")
         else:
             print("!!! Failed to generate article content.")
