@@ -1,17 +1,20 @@
 baseURL = 'https://vermillion24.github.io/cyber-news/'
 languageCode = 'en-us'
 title = 'Cyber Intel Hub'
-theme = 'terminal' # We will install a dark technical theme
+theme = 'terminal'
 
 [params]
-    description = "Automated daily cybersecurity intelligence and threat analysis."
-    contentTypeName = "posts"
-    # This adds your professional navigation
-    [[params.menu.main]]
-        name = "Archive"
-        url = "/posts"
-        weight = 1
-    [[params.menu.main]]
-        name = "About"
-        url = "/about"
-        weight = 2
+    # The 'Terminal' theme looks best in 'orange', 'blue', or 'green'
+    themeColor = 'green'
+    contentTypeName = 'posts'
+
+# This creates your "About" and "Archive" buttons automatically
+[[menu.main]]
+    name = "Archive"
+    url = "/posts"
+    weight = 1
+
+[[menu.main]]
+    name = "About"
+    url = "/about"
+    weight = 2
