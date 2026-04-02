@@ -4,11 +4,12 @@ title = 'Cyber Intel Hub'
 theme = 'terminal'
 
 [params]
-    # The 'Terminal' theme looks best in 'orange', 'blue', or 'green'
     themeColor = 'green'
     contentTypeName = 'posts'
+    fullWidthTheme = false
+    maxWidth = "900px"
+    showFullContent = true  # <--- This fixes the [] button issue
 
-# This creates your "About" and "Archive" buttons automatically
 [[menu.main]]
     name = "Archive"
     url = "/posts"
