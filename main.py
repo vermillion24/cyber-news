@@ -199,45 +199,92 @@ def send_email(content):
     except Exception as e:
         print(f"Resend error: {e}")
 
-
 def update_web_article(content):
-    print("Updating the live article...")
-    today_str = datetime.now().strftime('%B %d, %Y')
+    print("Archiving the article and updating the home page...")
     
-    # We strip the asterisks for the web view too
+    # Setup dates and paths
+    now = datetime.now()
+    date_str = now.strftime('%Y-%m-%d')
+    display_date = now.strftime('%B %d, %Y')
+    
+    # 1. Ensure the news directory exists
+    if not os.path.exists('news'):
+        os.makedirs('news')
+    
+    # 2. Create the unique daily file (The Archive)
+    # We use MVP.css here for a clean, professional look
+    daily_filename = f"news/{date_str}.html"
     clean_content = content.replace('**', '')
 
-    html_layout = f"""
+    daily_html = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Daily Cyber Intelligence - {today_str}</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
-        <style>
-            body {{ max-width: 800px; margin: 40px auto; padding: 0 20px; }}
-            .date-stamp {{ color: #7f8c8d; font-size: 0.9em; }}
-            .content-box {{ white-space: pre-wrap; }}
-        </style>
+        <title>Cyber Intel - {display_date}</title>
+        <link rel="stylesheet" href="https://unpkg.com/@mvpcss/vars/index.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mvpcss/reboot/reboot.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mvpcss/core/core.css">
     </head>
     <body>
-        <h1>🛡️ Daily Cyber Intelligence</h1>
-        <p class="date-stamp">Last Updated: {today_str}</p>
-        <hr>
-        <div class="content-box">{clean_content}</div>
-        <footer>
-            <p><small>Automated Research by CyberBot</small></p>
-        </footer>
+        <header>
+            <nav>
+                <a href="../index.html">⬅ Back to Home</a>
+            </nav>
+            <h1>🛡️ Intel Briefing: {display_date}</h1>
+        </header>
+        <main>
+            <section style="white-space: pre-wrap;">{clean_content}</section>
+        </main>
     </body>
     </html>
     """
+    
+    with open(daily_filename, "w", encoding="utf-8") as f:
+        f.write(daily_html)
 
-    # Save as index.html in the root folder
+    # 3. Update index.html (The Home Page / Master List)
+    # We add your LinkedIn and GitHub Star button here
+    github_repo = "vermillion24/cyber-news"
+    linkedin_url = "https://www.linkedin.com/in/YOUR_PROFILE" # Update this!
+
+    index_html = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Cyber Intelligence Archive</title>
+        <link rel="stylesheet" href="https://unpkg.com/@mvpcss/vars/index.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mvpcss/reboot/reboot.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mvpcss/core/core.css">
+    </head>
+    <body>
+        <header>
+            <h1>🛡️ Cyber Intelligence Hub</h1>
+            <p>Automated daily threat research and vulnerability analysis.</p>
+        </header>
+        <main>
+            <section>
+                <h2>Latest Briefing</h2>
+                <p>Read the most recent update: <a href="{daily_filename}">Update for {display_date}</a></p>
+            </section>
+            <hr>
+            <footer>
+                <h3>Connect & Support</h3>
+                <p>
+                    <a href="{linkedin_url}">LinkedIn Profile</a> | 
+                    <a href="https://github.com/{cyber-news}">View on GitHub</a>
+                </p>
+                <iframe src="https://ghbtns.com/github-btn.html?user={github_repo.split('/')[0]}&repo={github_repo.split('/')[1]}&type=star&count=true&size=large" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
+            </footer>
+        </main>
+    </body>
+    </html>
+    """
+    
     with open("index.html", "w", encoding="utf-8") as f:
-        f.write(html_layout)
-    print("[+] index.html successfully updated.")
-
+        f.write(index_html)
+        
 # --- 5. MAIN EXECUTION ---
 if __name__ == "__main__":
     from datetime import datetime
