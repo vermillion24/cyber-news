@@ -222,9 +222,15 @@ def update_web_article(content):
     <head>
         <meta charset="UTF-8">
         <title>Cyber Intel - {display_date}</title>
-        <link rel="stylesheet" href="https://unpkg.com/@mvpcss/vars/index.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mvpcss/reboot/reboot.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mvpcss/core/core.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
+        <style>
+            /* Adding a tiny bit of custom 'Cyber' flair */
+            body { max-width: 900px; line-height: 1.6; }
+            h1, h2 { color: #00ff41; font-family: 'Courier New', Courier, monospace; } /* Matrix Green headers */
+            header { border-bottom: 1px solid #444; margin-bottom: 20px; }
+            footer { margin-top: 50px; border-top: 1px solid #444; padding-top: 20px; }
+            a { color: #3498db; }
+        </style>
     </head>
     <body>
         <header>
@@ -254,9 +260,15 @@ def update_web_article(content):
     <head>
         <meta charset="UTF-8">
         <title>Cyber Intelligence Archive</title>
-        <link rel="stylesheet" href="https://unpkg.com/@mvpcss/vars/index.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mvpcss/reboot/reboot.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mvpcss/core/core.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
+        <style>
+            /* Adding a tiny bit of custom 'Cyber' flair */
+            body { max-width: 900px; line-height: 1.6; }
+            h1, h2 { color: #00ff41; font-family: 'Courier New', Courier, monospace; } /* Matrix Green headers */
+            header { border-bottom: 1px solid #444; margin-bottom: 20px; }
+            footer { margin-top: 50px; border-top: 1px solid #444; padding-top: 20px; }
+            a { color: #3498db; }
+        </style>
     </head>
     <body>
         <header>
