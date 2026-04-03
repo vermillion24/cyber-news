@@ -1,8 +1,11 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Cyber Intel Hub</title><link>https://vermillion24.github.io/cyber-news/</link><description>Recent content on Cyber Intel Hub</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Thu, 02 Apr 2026 23:26:58 +0000</lastBuildDate><atom:link href="https://vermillion24.github.io/cyber-news/index.xml" rel="self" type="application/rss+xml"/><item><title>Cyber Intel Brief: April 02, 2026</title><link>https://vermillion24.github.io/cyber-news/posts/2026-04-02/</link><pubDate>Thu, 02 Apr 2026 23:26:58 +0000</pubDate><guid>https://vermillion24.github.io/cyber-news/posts/2026-04-02/</guid><description>&lt;h3 id="daily-cyber-intelligence-brief"&gt;&lt;strong&gt;Daily Cyber Intelligence Brief&lt;/strong&gt;&lt;/h3&gt;
-&lt;p&gt;&lt;strong&gt;Date:&lt;/strong&gt; April 2, 2026&lt;br&gt;
-&lt;strong&gt;Prepared by:&lt;/strong&gt; Senior Cyber Security Research Team&lt;/p&gt;
-&lt;hr&gt;
-&lt;h3 id="1-main-headline-sapphire-sleet-compromises-axios-ecosystem-in-massive-npm-supply-chain-attack"&gt;&lt;strong&gt;1. Main Headline: Sapphire Sleet Compromises Axios Ecosystem in Massive NPM Supply Chain Attack&lt;/strong&gt;&lt;/h3&gt;
-&lt;hr&gt;
-&lt;h3 id="2-the-big-story-north-korean-state-actor-targets-javascript-supply-chain"&gt;&lt;strong&gt;2. The Big Story: North Korean State Actor Targets JavaScript Supply Chain&lt;/strong&gt;&lt;/h3&gt;
-&lt;p&gt;On March 31, 2026, the North Korean state-sponsored threat actor Sapphire Sleet successfully executed a supply chain compromise against Axios, one of the most widely utilized HTTP clients in the JavaScript ecosystem. The attackers published two malicious npm packages disguised as legitimate version updates. These packages were engineered to automatically fetch secondary payloads from a command-and-control (C2) infrastructure managed by the threat actor. Although the malicious versions have been purged from the npm registry, the window of exposure potentially impacted millions of developers and automated CI/CD pipelines globally.&lt;/p&gt;</description></item><item><title/><link>https://vermillion24.github.io/cyber-news/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://vermillion24.github.io/cyber-news/about/</guid><description/></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Cyber Intel Hub</title><link>https://vermillion24.github.io/cyber-news/</link><description>Recent content on Cyber Intel Hub</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://vermillion24.github.io/cyber-news/index.xml" rel="self" type="application/rss+xml"/><item><title>About the Intelligence Hub</title><link>https://vermillion24.github.io/cyber-news/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://vermillion24.github.io/cyber-news/about/</guid><description>&lt;h2 id="-automated-threat-research"&gt;🛡️ Automated Threat Research&lt;/h2&gt;
+&lt;p&gt;Welcome to a fully automated CTI (Cyber Threat Intelligence) pipeline.&lt;/p&gt;
+&lt;p&gt;This platform uses &lt;strong&gt;Python&lt;/strong&gt; and &lt;strong&gt;Gemini 1.5 Flash&lt;/strong&gt; to aggregate,
+summarize, and analyze global security feeds in real-time.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Research Focus:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Zero-day vulnerabilities&lt;/li&gt;
+&lt;li&gt;Ransomware trends&lt;/li&gt;
+&lt;li&gt;Nation-state actor tracking&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Connect:&lt;/strong&gt; [Your LinkedIn Link]&lt;/p&gt;</description></item></channel></rss>
