@@ -12,4 +12,4 @@ summarize, and analyze global security feeds in real-time.
 * Ransomware trends
 * Nation-state actor tracking
 
-**Connect:** [Your LinkedIn Link]
+**Connect:** [LinkedIn]
