@@ -4,6 +4,7 @@ import feedparser
 import resend
 import time
 import random
+import tweepy
 from datetime import datetime
 from dotenv import load_dotenv
 from google import genai
@@ -97,7 +98,6 @@ def generate_article(articles):
     for a in articles:
         context_text += f"SOURCE: {a['source']}\nTITLE: {a['title']}\nSUMMARY: {a['description']}\nLINK: {a['link']}\n---\n"
     
-    # NEW REFINED PROMPT
     prompt = f"""
     ROLE: You are a Senior Cyber Security Researcher and Technical Journalist.
     
@@ -139,15 +139,12 @@ def generate_article(articles):
     print("[-] Failed to generate article after 3 attempts due to 503 errors.")
     return None
     
-# --- 4. EMAIL DELIVERY (REFINED TEMPLATE) ---
 def send_email(content):
     print(f"Sending email to {TO_EMAIL} via Resend...")
     clean_content = content.replace('**', '')
     
-    # Get current date for the subject and header
     today_str = datetime.now().strftime('%B %d, %Y')
     
-    # This template creates a professional "Newsletter" feel in your inbox
     html_body = f"""
     <!DOCTYPE html>
     <html>
@@ -199,21 +196,17 @@ def send_email(content):
     except Exception as e:
         print(f"Resend error: {e}")
 
-import os
-from datetime import datetime
-
 def update_web_article(content):
     print("Generating Professional Markdown Post...")
     
-    # 1. Hugo looks in content/posts/ for your news
+    # 1. Hugo looks in content/posts/ for news
     os.makedirs('content/posts', exist_ok=True)
     
     now = datetime.now()
     date_str = now.strftime('%Y-%m-%d')
     file_path = f"content/posts/{date_str}.md"
     
-    # 2. The "Front Matter" (The block between ---)
-    # This tells Hugo the Title and Date of the post
+    # Hugo the Title and Date of the post
     markdown_output = f"""---
 title: "Cyber Intel Brief: {now.strftime('%B %d, %Y')}"
 date: "{now.isoformat()}"
@@ -236,46 +229,74 @@ Stay updated on the latest threats.
         
     print(f"[+] Saved successfully to {file_path}")
 
-    # --- HOME PAGE ---
-    index_html = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Cyber Intelligence Hub</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/dark.css">
-        {style_block}
-    </head>
-    <body>
-        <header>
-            <h1>🛡️ Cyber Intelligence Hub</h1>
-            <p>Automated research and vulnerability analysis.</p>
-        </header>
-        <main>
-            <section class="content-box">
-                <h2>Latest Briefing</h2>
-                <p>Most recent update: <a href="{daily_filename}">Analysis for {display_date}</a></p>
-            </section>
-            <footer>
-                <p>
-                    <a href="{linkedin_url}">LinkedIn</a> | 
-                    <a href="https://github.com/{github_repo}">GitHub Repo</a>
-                </p>
-                <iframe src="https://ghbtns.com/github-btn.html?user={github_repo.split('/')[0]}&repo={github_repo.split('/')[1]}&type=star&count=true&size=large" frameborder="0" scrolling="0" width="170" height="30"></iframe>
-            </footer>
-        </main>
-    </body>
-    </html>
+def post_to_buffer(title, link):
     """
+    Sends the daily brief to Buffer's GraphQL API using the 2026 Schema.
+    """
+    api_key = os.getenv("BUFFER_ACCESS_TOKEN")
+    channel_ids = ["69d42ae6031bfa423cd7876f", "FB_CHANNEL_ID"] 
+
+    endpoint = "https://api.buffer.com"
     
-    with open("index.html", "w", encoding="utf-8") as f:
-        f.write(index_html)
+    # Inline Fragments (... on) to handle the Union return type
+    query = """
+    mutation CreatePost($input: CreatePostInput!) {
+      createPost(input: $input) {
+        ... on PostActionSuccess {
+          post {
+            id
+          }
+        }
+        ... on MutationError {
+          message
+        }
+      }
+    }
+    """
+    clean_title = title.replace('**', '')
+    message = f"🛡️ New Cyber Intelligence Brief 🛡️\n\nTopic: {title}\n\nRead more: {link}\n#InfoSec #CyberSecurity"
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    for c_id in channel_ids:
+        if "YOUR_FB" in c_id: continue
+
+        variables = {
+            "input": {
+                "text": message,
+                "channelId": c_id,
+                "schedulingType": "automatic",
+                "mode": "shareNow",             
+                "mapping": "automatic"
+            }
+        }
+
+        try:
+            print(f"Posting to channel: {c_id}...")
+            response = requests.post(endpoint, json={"query": query, "variables": variables}, headers=headers)
+            data = response.json()
+            
+            # Check for GraphQL-level errors
+            if "errors" in data:
+                print(f"❌ GraphQL Error: {data['errors'][0]['message']}")
+            elif "data" in data and "createPost" in data["data"]:
+                result = data["data"]["createPost"]
+                if "message" in result: # This is the MutationError case
+                    print(f"❌ Buffer Logic Error: {result['message']}")
+                else:
+                    print(f"✅ Successfully sent to Buffer channel {c_id}!")
+            else:
+                print(f"❓ Unexpected Response: {data}")
+
+        except Exception as e:
+            print(f"❌ Request failed for {c_id}: {e}")
         
-# --- 5. MAIN EXECUTION ---
+# --- MAIN EXECUTION ---
 if __name__ == "__main__":
-    from datetime import datetime
-    
-    # Step 1: Get news with retry logic
+    # Get news
     news_items = fetch_all_sources()
     
     if not news_items:
@@ -283,16 +304,25 @@ if __name__ == "__main__":
     else:
         print(f"[+] Collected {len(news_items)} total items.")
         
-        # Step 2: Generate content (Gemini Call)
+        # Generate content (Gemini Call)
         article = generate_article(news_items)
         
         if article:
-            # Step 3: Action 1 - Send to your inbox for review
+            # Send to your inbox
             send_email(article)
             
-            # Step 4: Action 2 - Update the index.html for your website
+            # Generate the Markdown post for Hugo
             update_web_article(article)
             
-            print("[+] All tasks completed successfully.")
+            # Extract a dynamic title for the Tweet
+            # first line of the Gemini output as the headline
+            lines = article.strip().split('\n')
+            dynamic_title = lines[0].replace('#', '').strip() # Cleans up Markdown headers
+            
+            # Post to Social via Buffer
+            site_url = "https://vermillion24.github.io/cyber-news/"
+            post_to_buffer(dynamic_title, site_url)
+            
+            print("[+] All tasks completed successfully. Ready for Hugo build.")
         else:
             print("!!! Failed to generate article content.")
