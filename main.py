@@ -102,6 +102,10 @@ def generate_article(articles):
     ROLE: You are a Senior Cyber Security Researcher and Technical Journalist.
     
     TASK: Analyze the provided raw data and write a 'Daily Cyber Intelligence Brief' for a technical audience.
+    Also, provide a 'Social Hook' section at the end of your response. This should include:
+    -A catchy headline (no bolding).
+    -A 1-2 sentence 'juicy' summary of the most critical threat found today.
+    -Two relevant hashtags.
     
     CONSTRAINTS:
     - DO NOT use marketing fluff or "corporate speak."
