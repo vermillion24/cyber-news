@@ -36,18 +36,15 @@ jobs:
           hugo-version: 'latest'
           extended: true 
 
-      - name: Run Cyber News Script & Post to X
+      - name: Run Cyber News Script & Post to Buffer
         env:
-          # Existing AI & News Secrets
+          # AI & News Secrets
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
-          # New X (Twitter) Secrets
-          X_API_KEY: ${{ secrets.X_API_KEY }}
-          X_API_SECRET: ${{ secrets.X_API_SECRET }}
-          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
-          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          BUFFER_ACCESS_TOKEN: ${{ secrets.BUFFER_ACCESS_TOKEN }}
+        
         run: python main.py
 
       - name: Build Hugo Site
