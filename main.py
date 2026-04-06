@@ -4,6 +4,7 @@ import feedparser
 import resend
 import time
 import random
+import tweepy
 from datetime import datetime
 from dotenv import load_dotenv
 from google import genai
@@ -97,7 +98,6 @@ def generate_article(articles):
     for a in articles:
         context_text += f"SOURCE: {a['source']}\nTITLE: {a['title']}\nSUMMARY: {a['description']}\nLINK: {a['link']}\n---\n"
     
-    # NEW REFINED PROMPT
     prompt = f"""
     ROLE: You are a Senior Cyber Security Researcher and Technical Journalist.
     
@@ -139,15 +139,12 @@ def generate_article(articles):
     print("[-] Failed to generate article after 3 attempts due to 503 errors.")
     return None
     
-# --- 4. EMAIL DELIVERY (REFINED TEMPLATE) ---
 def send_email(content):
     print(f"Sending email to {TO_EMAIL} via Resend...")
     clean_content = content.replace('**', '')
     
-    # Get current date for the subject and header
     today_str = datetime.now().strftime('%B %d, %Y')
     
-    # This template creates a professional "Newsletter" feel in your inbox
     html_body = f"""
     <!DOCTYPE html>
     <html>
@@ -199,9 +196,6 @@ def send_email(content):
     except Exception as e:
         print(f"Resend error: {e}")
 
-import os
-from datetime import datetime
-
 def update_web_article(content):
     print("Generating Professional Markdown Post...")
     
@@ -212,8 +206,7 @@ def update_web_article(content):
     date_str = now.strftime('%Y-%m-%d')
     file_path = f"content/posts/{date_str}.md"
     
-    # 2. The "Front Matter" (The block between ---)
-    # This tells Hugo the Title and Date of the post
+    # Hugo the Title and Date of the post
     markdown_output = f"""---
 title: "Cyber Intel Brief: {now.strftime('%B %d, %Y')}"
 date: "{now.isoformat()}"
@@ -235,6 +228,30 @@ Stay updated on the latest threats.
         f.write(markdown_output)
         
     print(f"[+] Saved successfully to {file_path}")
+
+def post_cyber_brief(title, cve_id, summary, link):
+    client = tweepy.Client(
+        consumer_key=os.getenv("X_API_KEY"),
+        consumer_secret=os.getenv("X_API_SECRET"),
+        access_token=os.getenv("X_ACCESS_TOKEN"),
+        access_token_secret=os.getenv("X_ACCESS_SECRET")
+    )
+
+    # Professional formatting for InfoSec Twitter
+    tweet_text = (
+        f"🚨 Daily Cyber Intelligence 🚨\n\n"
+        f"Title: {title}\n"
+        f"Impact: {cve_id if cve_id else 'General Advisory'}\n\n"
+        f"📝 Summary: {summary[:100]}...\n\n"
+        f"Read Full Brief: {link}\n"
+        f"#CyberSecurity #InfoSec #CVE"
+    )
+
+    try:
+        response = client.create_tweet(text=tweet_text)
+        print(f"Tweet posted! ID: {response.data['id']}")
+    except Exception as e:
+        print(f"Error posting to X: {e}")
         
 # --- 5. MAIN EXECUTION ---
 if __name__ == "__main__":
