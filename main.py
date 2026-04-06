@@ -102,10 +102,6 @@ def generate_article(articles):
     ROLE: You are a Senior Cyber Security Researcher and Technical Journalist.
     
     TASK: Analyze the provided raw data and write a 'Daily Cyber Intelligence Brief' for a technical audience.
-    Also, provide a 'Social Hook' section at the end of your response. This should include:
-    -A catchy headline (no bolding).
-    -A 1-2 sentence 'juicy' summary of the most critical threat found today.
-    -Two relevant hashtags.
     
     CONSTRAINTS:
     - DO NOT use marketing fluff or "corporate speak."
@@ -119,6 +115,11 @@ def generate_article(articles):
     3. Vendor Security Watch: Provide a bulleted list for updates from Cloudflare, Fortinet, Oracle, Cisco, and Microsoft. Each bullet should mention the specific product and the fix.
     4. Critical Headlines: 3-5 short bullets on other notable security news.
     5. Admin Priority List: A 'TL;DR' list of 3 specific actions (e.g., "Patch FortiOS to v7.x immediately").
+    
+    Also, provide a 'Social Hook' section at the end of your response. This should include:
+    -A catchy headline (no bolding).
+    -A 1-2 sentence 'juicy' summary of the most critical threat found today.
+    -Two relevant hashtags.
 
     RAW DATA FOR ANALYSIS:
     {context_text}
@@ -233,23 +234,37 @@ Stay updated on the latest threats.
         
     print(f"[+] Saved successfully to {file_path}")
 
-def post_to_buffer(title, link):
+def post_to_buffer(article_content, link):
     """
-    Sends the daily brief to Buffer's GraphQL API.
+    using the GraphQL schema.
     """
     api_key = os.getenv("BUFFER_ACCESS_TOKEN")
     channel_ids = ["69d42ae6031bfa423cd7876f"] 
-
     endpoint = "https://api.buffer.com"
-    
-    # STABLE QUERY: Uses fragments and handles the schema
+
+    # ---JUICY EXTRACTION LOGIC ---
+    if "Social Hook" in article_content:
+        # Split by 'Social Hook', take everything after it, and clean it up
+        social_part = article_content.split("Social Hook")[-1].strip()
+        social_text = social_part.replace('**', '').replace('#', '').strip()
+    else:
+        # Fallback: Use the first line but make it look like an alert
+        lines = article_content.strip().split('\n')
+        first_line = lines[0].replace('#', '').replace('**', '').strip()
+        social_text = f"🚨 {first_line}\n\nCritical vulnerabilities detected in today's security sweep."
+
+    formatted_message = (
+        f"{social_text}\n\n"
+        f"👇 Full Technical Deep-Dive:\n"
+        f"{link}"
+    )
+
+    # --- GRAPHQL QUERY ---
     query = """
     mutation CreatePost($input: CreatePostInput!) {
       createPost(input: $input) {
         ... on PostActionSuccess {
-          post {
-            id
-          }
+          post { id }
         }
         ... on MutationError {
           message
@@ -257,19 +272,17 @@ def post_to_buffer(title, link):
       }
     }
     """
-    
-    clean_title = title.replace('**', '').strip()
-    message = f"🛡️ New Cyber Intelligence Brief 🛡️\n\nTopic: {clean_title}\n\nRead more: {link}\n#InfoSec #CyberSecurity"
 
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
 
+    # ---EXECUTION WITH ERROR HANDLING ---
     for c_id in channel_ids:
         variables = {
             "input": {
-                "text": message,
+                "text": formatted_message[:275],
                 "channelId": c_id,
                 "schedulingType": "automatic",
                 "mode": "shareNow"
@@ -277,17 +290,15 @@ def post_to_buffer(title, link):
         }
 
         try:
-            print(f"Pushing to Buffer channel: {c_id}...")
+            print(f"Pushing juicy post to channel: {c_id}...")
             response = requests.post(endpoint, json={"query": query, "variables": variables}, headers=headers)
             
-            # Defensive check for non-JSON responses
             if response.status_code != 200:
                 print(f"❌ HTTP Error {response.status_code}: {response.text}")
                 continue
 
             data = response.json()
             
-            # Check for structural GraphQL errors
             if "errors" in data:
                 print(f"❌ GraphQL Validation Error: {data['errors'][0]['message']}")
             elif "data" in data and "createPost" in data["data"]:
@@ -327,7 +338,7 @@ if __name__ == "__main__":
             
             # Post to Social via Buffer
             site_url = "https://vermillion24.github.io/cyber-news/"
-            post_to_buffer(dynamic_title, site_url)
+            post_to_buffer(article, site_url)
             
             print("[+] All tasks completed successfully. Ready for Hugo build.")
         else:
