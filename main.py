@@ -234,7 +234,7 @@ def post_to_buffer(title, link):
     Sends the daily brief to Buffer's GraphQL API using the 2026 Schema.
     """
     api_key = os.getenv("BUFFER_ACCESS_TOKEN")
-    channel_ids = ["69d42ae6031bfa423cd7876f", "YOUR_FB_CHANNEL_ID"] 
+    channel_ids = ["69d42ae6031bfa423cd7876f", "FB_CHANNEL_ID"] 
 
     endpoint = "https://api.buffer.com"
     
