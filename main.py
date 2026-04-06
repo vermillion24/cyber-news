@@ -253,7 +253,7 @@ def post_to_buffer(title, link):
       }
     }
     """
-    
+    clean_title = title.replace('**', '')
     message = f"🛡️ New Cyber Intelligence Brief 🛡️\n\nTopic: {title}\n\nRead more: {link}\n#InfoSec #CyberSecurity"
 
     headers = {
@@ -262,11 +262,14 @@ def post_to_buffer(title, link):
     }
 
     for c_id in channel_ids:
+        if "YOUR_FB" in c_id: continue
+
         variables = {
             "input": {
                 "text": message,
                 "channelId": c_id,
-                "schedulingType": "now",
+                "schedulingType": "automatic",
+                "mode": "shareNow",             
                 "mapping": "automatic"
             }
         }
