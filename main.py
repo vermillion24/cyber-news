@@ -199,7 +199,7 @@ def send_email(content):
 def update_web_article(content):
     print("Generating Professional Markdown Post...")
     
-    # 1. Hugo looks in content/posts/ for your news
+    # 1. Hugo looks in content/posts/ for news
     os.makedirs('content/posts', exist_ok=True)
     
     now = datetime.now()
@@ -229,34 +229,54 @@ Stay updated on the latest threats.
         
     print(f"[+] Saved successfully to {file_path}")
 
-def tweet_daily_brief(title, link):
+def post_to_buffer(title, link):
     """
-    Sends a tweet with the title and URL of the new cyber-news post.
+    Sends the daily brief to Buffer's GraphQL API.
     """
+    api_key = os.getenv("BUFFER_ACCESS_TOKEN")
+    profile_ids = ["69d42ae6031bfa423cd7876f", "FB_PROFILE_ID"] 
+
+    endpoint = "https://api.buffer.com"
+    
+    # GraphQL Mutation to create a post
+    query = """
+    mutation CreatePost($input: CreatePostInput!) {
+      createPost(input: $input) {
+        post {
+          id
+          text
+        }
+      }
+    }
+    """
+    
+    # message
+    message = f"🛡️ New Cyber Intelligence Brief 🛡️\n\nTopic: {title}\n\nRead more: {link}\n#InfoSec #CyberSecurity"
+
+    variables = {
+        "input": {
+            "text": message,
+            "profileIds": profile_ids,
+            "shorten": True,
+            "now": True # Sends immediately
+        }
+    }
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
     try:
-        # Authentication using the environment variables from GitHub Secrets
-        twitter_client = tweepy.Client(
-            consumer_key=os.getenv("X_API_KEY"),
-            consumer_secret=os.getenv("X_API_SECRET"),
-            access_token=os.getenv("X_ACCESS_TOKEN"),
-            access_token_secret=os.getenv("X_ACCESS_SECRET")
-    )
-
-        # Structure the tweet for InfoSec engagement
-        tweet_text = (
-            f"🛡️ New Cyber Intelligence Brief 🛡️\n\n"
-            f"Topic: {title}\n"
-            f"Read the full technical breakdown here: {link}\n\n"
-            f"#CyberSecurity #InfoSec #CyberNews #GitHubActions"
-        )
-
-        response = twitter_client.create_tweet(text=tweet_text)
-        print(f"✅ Tweet successfully posted! ID: {response.data['id']}")
-        
+        response = requests.post(endpoint, json={"query": query, "variables": variables}, headers=headers)
+        if response.status_code == 200:
+            print("✅ Successfully sent to Buffer!")
+        else:
+            print(f"❌ Buffer Error: {response.text}")
     except Exception as e:
-        print(f"❌ Failed to tweet: {e}")
+        print(f"❌ Request failed: {e}")
         
-# --- 5. MAIN EXECUTION ---
+# --- MAIN EXECUTION ---
 if __name__ == "__main__":
     # Get news
     news_items = fetch_all_sources()
@@ -281,9 +301,9 @@ if __name__ == "__main__":
             lines = article.strip().split('\n')
             dynamic_title = lines[0].replace('#', '').strip() # Cleans up Markdown headers
             
-            # Post to X (Twitter)
-            site_url = "https://vermillion24.github.io/cyber-news/" 
-            tweet_daily_brief(dynamic_title, site_url)
+            # Post to Social via Buffer
+            site_url = "https://vermillion24.github.io/cyber-news/"
+            post_to_buffer(dynamic_title, site_url)
             
             print("[+] All tasks completed successfully. Ready for Hugo build.")
         else:
