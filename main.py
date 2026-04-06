@@ -231,50 +231,65 @@ Stay updated on the latest threats.
 
 def post_to_buffer(title, link):
     """
-    Sends the daily brief to Buffer's GraphQL API.
+    Sends the daily brief to Buffer's GraphQL API using the 2026 Schema.
     """
     api_key = os.getenv("BUFFER_ACCESS_TOKEN")
-    profile_ids = ["69d42ae6031bfa423cd7876f", "FB_PROFILE_ID"] 
+    channel_ids = ["69d42ae6031bfa423cd7876f", "YOUR_FB_CHANNEL_ID"] 
 
     endpoint = "https://api.buffer.com"
     
-    # GraphQL Mutation to create a post
+    # Inline Fragments (... on) to handle the Union return type
     query = """
     mutation CreatePost($input: CreatePostInput!) {
       createPost(input: $input) {
-        post {
-          id
-          text
+        ... on PostActionSuccess {
+          post {
+            id
+          }
+        }
+        ... on MutationError {
+          message
         }
       }
     }
     """
     
-    # message
     message = f"🛡️ New Cyber Intelligence Brief 🛡️\n\nTopic: {title}\n\nRead more: {link}\n#InfoSec #CyberSecurity"
-
-    variables = {
-        "input": {
-            "text": message,
-            "profileIds": profile_ids,
-            "shorten": True,
-            "now": True # Sends immediately
-        }
-    }
 
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
 
-    try:
-        response = requests.post(endpoint, json={"query": query, "variables": variables}, headers=headers)
-        if response.status_code == 200:
-            print("✅ Successfully sent to Buffer!")
-        else:
-            print(f"❌ Buffer Error: {response.text}")
-    except Exception as e:
-        print(f"❌ Request failed: {e}")
+    for c_id in channel_ids:
+        variables = {
+            "input": {
+                "text": message,
+                "channelId": c_id,
+                "mapping": "automatic",
+                "mode": "now" # shareNow equivalent
+            }
+        }
+
+        try:
+            print(f"Posting to channel: {c_id}...")
+            response = requests.post(endpoint, json={"query": query, "variables": variables}, headers=headers)
+            data = response.json()
+            
+            # Check for GraphQL-level errors
+            if "errors" in data:
+                print(f"❌ GraphQL Error: {data['errors'][0]['message']}")
+            elif "data" in data and "createPost" in data["data"]:
+                result = data["data"]["createPost"]
+                if "message" in result: # This is the MutationError case
+                    print(f"❌ Buffer Logic Error: {result['message']}")
+                else:
+                    print(f"✅ Successfully sent to Buffer channel {c_id}!")
+            else:
+                print(f"❓ Unexpected Response: {data}")
+
+        except Exception as e:
+            print(f"❌ Request failed for {c_id}: {e}")
         
 # --- MAIN EXECUTION ---
 if __name__ == "__main__":
