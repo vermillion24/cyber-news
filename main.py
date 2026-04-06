@@ -229,35 +229,36 @@ Stay updated on the latest threats.
         
     print(f"[+] Saved successfully to {file_path}")
 
-def post_cyber_brief(title, cve_id, summary, link):
-    client = tweepy.Client(
-        consumer_key=os.getenv("X_API_KEY"),
-        consumer_secret=os.getenv("X_API_SECRET"),
-        access_token=os.getenv("X_ACCESS_TOKEN"),
-        access_token_secret=os.getenv("X_ACCESS_SECRET")
-    )
-
-    # Professional formatting for InfoSec Twitter
-    tweet_text = (
-        f"🚨 Daily Cyber Intelligence 🚨\n\n"
-        f"Title: {title}\n"
-        f"Impact: {cve_id if cve_id else 'General Advisory'}\n\n"
-        f"📝 Summary: {summary[:100]}...\n\n"
-        f"Read Full Brief: {link}\n"
-        f"#CyberSecurity #InfoSec #CVE"
-    )
-
+def tweet_daily_brief(title, link):
+    """
+    Sends a tweet with the title and URL of the new cyber-news post.
+    """
     try:
-        response = client.create_tweet(text=tweet_text)
-        print(f"Tweet posted! ID: {response.data['id']}")
+        # Authentication using the environment variables from GitHub Secrets
+        twitter_client = tweepy.Client(
+            consumer_key=os.getenv("X_API_KEY"),
+            consumer_secret=os.getenv("X_API_SECRET"),
+            access_token=os.getenv("X_ACCESS_TOKEN"),
+            access_token_secret=os.getenv("X_ACCESS_SECRET")
+    )
+
+        # Structure the tweet for InfoSec engagement
+        tweet_text = (
+            f"🛡️ New Cyber Intelligence Brief 🛡️\n\n"
+            f"Topic: {title}\n"
+            f"Read the full technical breakdown here: {link}\n\n"
+            f"#CyberSecurity #InfoSec #CyberNews #GitHubActions"
+        )
+
+        response = twitter_client.create_tweet(text=tweet_text)
+        print(f"✅ Tweet successfully posted! ID: {response.data['id']}")
+        
     except Exception as e:
-        print(f"Error posting to X: {e}")
+        print(f"❌ Failed to tweet: {e}")
         
 # --- 5. MAIN EXECUTION ---
 if __name__ == "__main__":
-    from datetime import datetime
-    
-    # Step 1: Get news with retry logic
+    # Get news
     news_items = fetch_all_sources()
     
     if not news_items:
@@ -265,16 +266,24 @@ if __name__ == "__main__":
     else:
         print(f"[+] Collected {len(news_items)} total items.")
         
-        # Step 2: Generate content (Gemini Call)
+        # Generate content (Gemini Call)
         article = generate_article(news_items)
         
         if article:
-            # Step 3: Send to your inbox (Newsletter/Notification)
+            # Send to your inbox
             send_email(article)
             
-            # Step 4: Generate the Markdown post for Hugo
-            # This triggers the function we just cleaned up
+            # Generate the Markdown post for Hugo
             update_web_article(article)
+            
+            # Extract a dynamic title for the Tweet
+            # first line of the Gemini output as the headline
+            lines = article.strip().split('\n')
+            dynamic_title = lines[0].replace('#', '').strip() # Cleans up Markdown headers
+            
+            # Post to X (Twitter)
+            site_url = "https://vermillion24.github.io/cyber-news/" 
+            tweet_daily_brief(dynamic_title, site_url)
             
             print("[+] All tasks completed successfully. Ready for Hugo build.")
         else:
