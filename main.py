@@ -119,7 +119,7 @@ def generate_article(articles):
     Also, provide a 'Social Hook' section at the end of your response. This should include:
     -A catchy headline (no bolding).
     -A 1-2 sentence 'juicy' summary of the most critical threat found today.
-    -Two relevant hashtags.
+    -End the response with the exact marker 'Social Hook:' followed by a juicy 2-sentence summary and 2 hashtags.
 
     RAW DATA FOR ANALYSIS:
     {context_text}
@@ -252,7 +252,7 @@ def post_to_buffer(article_content, link):
         lines = article_content.strip().split('\n')
         first_line = lines[0].replace('#', '').replace('**', '').strip()
         social_text = f"🚨 {first_line}\n\nCritical vulnerabilities detected in today's security sweep."
-
+    safe_social_text = social_text[:200]
     formatted_message = (
         f"{social_text}\n\n"
         f"👇 Full Technical Deep-Dive:\n"
@@ -282,7 +282,7 @@ def post_to_buffer(article_content, link):
     for c_id in channel_ids:
         variables = {
             "input": {
-                "text": formatted_message[:275],
+                "text": formatted_message[:270],
                 "channelId": c_id,
                 "schedulingType": "automatic",
                 "mode": "shareNow"
