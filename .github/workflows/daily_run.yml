@@ -3,7 +3,7 @@ name: Daily Cyber News Professional Build
 on:
   schedule:
     - cron: '0 5 * * *' # Runs at 5:00 AM daily
-  workflow_dispatch: # Allows manual testing
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -23,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.12' # Your successful version
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
@@ -34,14 +34,20 @@ jobs:
         uses: peaceiris/actions-hugo@v3
         with:
           hugo-version: 'latest'
-          extended: true # Terminal theme needs the "extended" version for CSS
+          extended: true 
 
-      - name: Run Cyber News Script
+      - name: Run Cyber News Script & Post to X
         env:
+          # Existing AI & News Secrets
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           TO_EMAIL: ${{ secrets.TO_EMAIL }}
+          # New X (Twitter) Secrets
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
         run: python main.py
 
       - name: Build Hugo Site
@@ -51,4 +57,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public # The folder Hugo generates
+          publish_dir: ./public
