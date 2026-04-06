@@ -231,14 +231,14 @@ Stay updated on the latest threats.
 
 def post_to_buffer(title, link):
     """
-    Sends the daily brief to Buffer's GraphQL API using the 2026 Schema.
+    Sends the daily brief to Buffer's GraphQL API.
     """
     api_key = os.getenv("BUFFER_ACCESS_TOKEN")
-    channel_ids = ["69d42ae6031bfa423cd7876f", "FB_CHANNEL_ID"] 
+    channel_ids = ["69d42ae6031bfa423cd7876f"] 
 
     endpoint = "https://api.buffer.com"
     
-    # Inline Fragments (... on) to handle the Union return type
+    # STABLE QUERY: Uses fragments and handles the schema
     query = """
     mutation CreatePost($input: CreatePostInput!) {
       createPost(input: $input) {
@@ -253,8 +253,9 @@ def post_to_buffer(title, link):
       }
     }
     """
-    clean_title = title.replace('**', '')
-    message = f"🛡️ New Cyber Intelligence Brief 🛡️\n\nTopic: {title}\n\nRead more: {link}\n#InfoSec #CyberSecurity"
+    
+    clean_title = title.replace('**', '').strip()
+    message = f"🛡️ New Cyber Intelligence Brief 🛡️\n\nTopic: {clean_title}\n\nRead more: {link}\n#InfoSec #CyberSecurity"
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -262,37 +263,38 @@ def post_to_buffer(title, link):
     }
 
     for c_id in channel_ids:
-        if "YOUR_FB" in c_id: continue
-
         variables = {
             "input": {
                 "text": message,
                 "channelId": c_id,
                 "schedulingType": "automatic",
-                "mode": "shareNow",             
-                "mapping": "automatic"
+                "mode": "shareNow"
             }
         }
 
         try:
-            print(f"Posting to channel: {c_id}...")
+            print(f"Pushing to Buffer channel: {c_id}...")
             response = requests.post(endpoint, json={"query": query, "variables": variables}, headers=headers)
+            
+            # Defensive check for non-JSON responses
+            if response.status_code != 200:
+                print(f"❌ HTTP Error {response.status_code}: {response.text}")
+                continue
+
             data = response.json()
             
-            # Check for GraphQL-level errors
+            # Check for structural GraphQL errors
             if "errors" in data:
-                print(f"❌ GraphQL Error: {data['errors'][0]['message']}")
+                print(f"❌ GraphQL Validation Error: {data['errors'][0]['message']}")
             elif "data" in data and "createPost" in data["data"]:
                 result = data["data"]["createPost"]
-                if "message" in result: # This is the MutationError case
+                if "message" in result:
                     print(f"❌ Buffer Logic Error: {result['message']}")
                 else:
-                    print(f"✅ Successfully sent to Buffer channel {c_id}!")
-            else:
-                print(f"❓ Unexpected Response: {data}")
-
+                    print(f"✅ Post Successful! ID: {result['post']['id']}")
+        
         except Exception as e:
-            print(f"❌ Request failed for {c_id}: {e}")
+            print(f"❌ Script Error: {e}")
         
 # --- MAIN EXECUTION ---
 if __name__ == "__main__":
