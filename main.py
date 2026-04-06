@@ -266,8 +266,8 @@ def post_to_buffer(title, link):
             "input": {
                 "text": message,
                 "channelId": c_id,
-                "mapping": "automatic",
-                "mode": "now" # shareNow equivalent
+                "schedulingType": "now",
+                "mapping": "automatic"
             }
         }
 
