@@ -1,4 +1,4 @@
-baseURL = 'https://vermillion24.github.io/cyber-news/'
+baseURL = 'https://www.secintel.net/cyber-news/'
 languageCode = 'en-us'
 title = 'Cyber Intel Hub'
 theme = 'terminal'
