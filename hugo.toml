@@ -1,4 +1,4 @@
-baseURL = 'https://www.secintel.net/cyber-news/'
+baseURL = 'https://www.secintel.net/'
 languageCode = 'en-us'
 title = 'Cyber Intel Hub'
 theme = 'terminal'
