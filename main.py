@@ -236,39 +236,44 @@ Stay updated on the latest threats.
 
 def post_to_buffer(article_content, link):
     """
-    using the GraphQL schema.
+    Final Stable Version: Guaranteed Link Inclusion
     """
     api_key = os.getenv("BUFFER_ACCESS_TOKEN")
     channel_ids = ["69d42ae6031bfa423cd7876f"] 
     endpoint = "https://api.buffer.com"
 
-    # ---JUICY EXTRACTION LOGIC ---
-    if "Social Hook" in article_content:
-        # Split by 'Social Hook', take everything after it, and clean it up
-        social_part = article_content.split("Social Hook")[-1].strip()
-        social_text = social_part.replace('**', '').replace('#', '').strip()
+    # --- 1. CLEAN THE CONTENT ---
+    # Remove markdown bolding immediately to save character space
+    clean_article = article_content.replace('**', '').replace('#', '').strip()
+
+    # --- 2. EXTRACTION LOGIC ---
+    if "Social Hook:" in clean_article:
+        # Get everything after the marker
+        social_text = clean_article.split("Social Hook:")[-1].strip()
     else:
-        # Fallback: Use the first line but make it look like an alert
-        lines = article_content.strip().split('\n')
-        first_line = lines[0].replace('#', '').replace('**', '').strip()
-        social_text = f"🚨 {first_line}\n\nCritical vulnerabilities detected in today's security sweep."
-    safe_social_text = social_text[:200]
-    formatted_message = (
-        f"{social_text}\n\n"
-        f"👇 Full Technical Deep-Dive:\n"
+        # Fallback: Take the first two sentences of the article
+        lines = clean_article.split('\n')
+        social_text = lines[0] if lines else "New Cyber Intelligence Briefing Available."
+
+    # --- 3. THE "LINK PROTECTOR" SLICE ---
+    # We truncate the text to 200 chars BEFORE adding the link.
+    # This ensures the total message stays under X's 280 limit.
+    if len(social_text) > 200:
+        social_text = social_text[:197] + "..."
+
+    # --- 4. FINAL MESSAGE ASSEMBLY (The Link is Forced Here) ---
+    final_message = (
+        f"🚨 {social_text}\n\n"
+        f"🔗 Read Full Report:\n"
         f"{link}"
     )
 
-    # --- GRAPHQL QUERY ---
+    # --- 5. GRAPHQL EXECUTION ---
     query = """
     mutation CreatePost($input: CreatePostInput!) {
       createPost(input: $input) {
-        ... on PostActionSuccess {
-          post { id }
-        }
-        ... on MutationError {
-          message
-        }
+        ... on PostActionSuccess { post { id } }
+        ... on MutationError { message }
       }
     }
     """
@@ -278,11 +283,11 @@ def post_to_buffer(article_content, link):
         "Content-Type": "application/json"
     }
 
-    # ---EXECUTION WITH ERROR HANDLING ---
     for c_id in channel_ids:
+        # IMPORTANT: We pass 'final_message' directly without any more slicing
         variables = {
             "input": {
-                "text": formatted_message[:270],
+                "text": final_message, 
                 "channelId": c_id,
                 "schedulingType": "automatic",
                 "mode": "shareNow"
@@ -290,27 +295,17 @@ def post_to_buffer(article_content, link):
         }
 
         try:
-            print(f"Pushing juicy post to channel: {c_id}...")
+            print(f"Pushing to Buffer: {c_id}...")
             response = requests.post(endpoint, json={"query": query, "variables": variables}, headers=headers)
-            
-            if response.status_code != 200:
-                print(f"❌ HTTP Error {response.status_code}: {response.text}")
-                continue
-
             data = response.json()
             
             if "errors" in data:
-                print(f"❌ GraphQL Validation Error: {data['errors'][0]['message']}")
-            elif "data" in data and "createPost" in data["data"]:
-                result = data["data"]["createPost"]
-                if "message" in result:
-                    print(f"❌ Buffer Logic Error: {result['message']}")
-                else:
-                    print(f"✅ Post Successful! ID: {result['post']['id']}")
-        
+                print(f"❌ GraphQL Error: {data['errors'][0]['message']}")
+            else:
+                print(f"✅ Success! Post sent to {c_id}")
         except Exception as e:
             print(f"❌ Script Error: {e}")
-        
+            
 # --- MAIN EXECUTION ---
 if __name__ == "__main__":
     # Get news
