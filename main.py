@@ -236,39 +236,33 @@ Stay updated on the latest threats.
 
 def post_to_buffer(article_content, link):
     """
-    Final Stable Version: Guaranteed Link Inclusion
+    Post to social media through buffer schema
     """
     api_key = os.getenv("BUFFER_ACCESS_TOKEN")
     channel_ids = ["69d42ae6031bfa423cd7876f"] 
     endpoint = "https://api.buffer.com"
 
-    # --- 1. CLEAN THE CONTENT ---
-    # Remove markdown bolding immediately to save character space
     clean_article = article_content.replace('**', '').replace('#', '').strip()
 
-    # --- 2. EXTRACTION LOGIC ---
+    # --- EXTRACTION LOGIC ---
     if "Social Hook:" in clean_article:
-        # Get everything after the marker
         social_text = clean_article.split("Social Hook:")[-1].strip()
     else:
         # Fallback: Take the first two sentences of the article
         lines = clean_article.split('\n')
         social_text = lines[0] if lines else "New Cyber Intelligence Briefing Available."
 
-    # --- 3. THE "LINK PROTECTOR" SLICE ---
-    # We truncate the text to 200 chars BEFORE adding the link.
-    # This ensures the total message stays under X's 280 limit.
     if len(social_text) > 200:
         social_text = social_text[:197] + "..."
 
-    # --- 4. FINAL MESSAGE ASSEMBLY (The Link is Forced Here) ---
+    # --- MESSAGE ---
     final_message = (
         f"🚨 {social_text}\n\n"
         f"🔗 Read Full Report:\n"
         f"{link}"
     )
 
-    # --- 5. GRAPHQL EXECUTION ---
+    # --- GRAPHQL EXECUTION ---
     query = """
     mutation CreatePost($input: CreatePostInput!) {
       createPost(input: $input) {
@@ -284,7 +278,6 @@ def post_to_buffer(article_content, link):
     }
 
     for c_id in channel_ids:
-        # IMPORTANT: We pass 'final_message' directly without any more slicing
         variables = {
             "input": {
                 "text": final_message, 
@@ -320,14 +313,12 @@ if __name__ == "__main__":
         article = generate_article(news_items)
         
         if article:
-            # Send to your inbox
             send_email(article)
             
             # Generate the Markdown post for Hugo
             update_web_article(article)
             
             # Extract a dynamic title for the Tweet
-            # first line of the Gemini output as the headline
             lines = article.strip().split('\n')
             dynamic_title = lines[0].replace('#', '').strip() # Cleans up Markdown headers
             
