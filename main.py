@@ -323,7 +323,7 @@ if __name__ == "__main__":
             dynamic_title = lines[0].replace('#', '').strip() # Cleans up Markdown headers
             
             # Post to Social via Buffer
-            site_url = "https://vermillion24.github.io/cyber-news/"
+            site_url = "https://secintel.net/"
             post_to_buffer(article, site_url)
             
             print("[+] All tasks completed successfully. Ready for Hugo build.")
