@@ -1,6 +1,6 @@
 baseURL = 'https://www.secintel.net/'
 languageCode = 'en-us'
-title = 'Cyber Intel Hub'
+title = 'SecIntel | Independent Zero-Day Intelligence Brief'
 theme = 'terminal'
 
 [params]
