@@ -202,38 +202,32 @@ def send_email(content):
         print(f"Resend error: {e}")
 
 def update_web_article(content):
-    print("Generating Professional Markdown Post...")
+    print("Uploading Intelligence Brief to SecIntel API...")
     
-    # 1. Hugo looks in content/posts/ for news
-    os.makedirs('content/posts', exist_ok=True)
+    # 1. Configuration
+    API_URL = "https://secintel.net/api/news" 
+    API_TOKEN = os.environ.get('API_AUTH_TOKEN') 
     
-    now = datetime.now()
-    date_str = now.strftime('%Y-%m-%d')
-    file_path = f"content/posts/{date_str}.md"
+    # 2. Extract the first line as the Title
+    lines = content.strip().split('\n')
+    title = lines[0].replace('#', '').strip()
     
-    # Hugo the Title and Date of the post
-    markdown_output = f"""---
-title: "Cyber Intel Brief: {now.strftime('%B %d, %Y')}"
-date: "{now.isoformat()}"
-author: "CyberBot"
-draft: false
-toc: true
----
-
-{content}
-
----
-### 📬 Subscribe & Connect
-Stay updated on the latest threats. 
-[View GitHub Repo](https://github.com/vermillion24/cyber-news) | [LinkedIn](https://www.linkedin.com/in/YOUR_PROFILE)
-"""
-
-    # 3. Write the file
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(markdown_output)
+    # 3. Payload
+    payload = {
+        "title": title,
+        "content": content,
+        "date": datetime.now().isoformat()
+    }
+    
+    # 4. POST to Cloudflare
+    try:
+        headers = {"Authorization": f"Bearer {API_TOKEN}", "Content-Type": "application/json"}
+        response = requests.post(API_URL, json=payload, headers=headers)
+        response.raise_for_status()
+        print(f"[+] Successfully posted to SecIntel Database!")
+    except Exception as e:
+        print(f"[-] Failed to update web database: {e}")
         
-    print(f"[+] Saved successfully to {file_path}")
-
 def post_to_buffer(article_content, link):
     """
     Post to social media through buffer schema
