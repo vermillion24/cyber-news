@@ -309,7 +309,7 @@ if __name__ == "__main__":
         if article:
             send_email(article)
             
-            # Generate the Markdown post for Hugo
+            # Generate the Markdown
             update_web_article(article)
             
             # Extract a dynamic title for the Tweet
@@ -320,6 +320,6 @@ if __name__ == "__main__":
             site_url = "https://secintel.net/"
             post_to_buffer(article, site_url)
             
-            print("[+] All tasks completed successfully. Ready for Hugo build.")
+            print("[+] All tasks completed successfully. Ready for deployment.")
         else:
             print("!!! Failed to generate article content.")
