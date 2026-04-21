@@ -204,30 +204,33 @@ def send_email(content):
 def update_web_article(content):
     print("Uploading Intelligence Brief to SecIntel API...")
     
-    # 1. Configuration
-    API_URL = "https://secintel.net/api/news" 
-    API_TOKEN = os.environ.get('API_AUTH_TOKEN') 
+    API_URL = "https://secintel.net/api/news"
+    API_TOKEN = os.environ.get('API_AUTH_TOKEN')
     
-    # 2. Extract the first line as the Title
     lines = content.strip().split('\n')
     title = lines[0].replace('#', '').strip()
     
-    # 3. Payload
     payload = {
         "title": title,
         "content": content,
         "date": datetime.now().isoformat()
     }
     
-    # 4. POST to Cloudflare
     try:
-        headers = {"Authorization": f"Bearer {API_TOKEN}", "Content-Type": "application/json"}
+        headers = {
+            "Authorization": f"Bearer {API_TOKEN}",
+            "Content-Type": "application/json"
+        }
         response = requests.post(API_URL, json=payload, headers=headers)
+        
+        # ── NEW: print exactly what the server says ──
+        print(f"Status Code: {response.status_code}")
+        print(f"Response Body: {response.text[:1000]}")  # first 1000 chars
+        
         response.raise_for_status()
-        print(f"[+] Successfully posted to SecIntel Database!")
+        print("[+] Successfully posted to SecIntel Database!")
     except Exception as e:
         print(f"[-] Failed to update web database: {e}")
-        
 def post_to_buffer(article_content, link):
     """
     Post to social media through buffer schema
