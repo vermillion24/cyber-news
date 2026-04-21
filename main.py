@@ -300,19 +300,22 @@ if __name__ == "__main__":
         full_response = generate_article(news_items)
         
         if full_response:
-            # 1. Split the content at the marker
-            if "### Social Hook" in full_response:
-                web_content, social_content = full_response.split("### Social Hook")
+            # Use maxsplit=1 to avoid "too many values to unpack"
+            parts = full_response.split("### Social Hook", 1)
+            
+            if len(parts) == 2:
+                web_content = parts[0].strip()
+                social_content = parts[1].strip()
             else:
-                web_content = full_response
-                social_content = "New Cyber Intelligence Briefing Available."
+                web_content = full_response.strip()
+                social_content = "Latest updates in Kenyan & Global Cyber Security."
 
             # 2. Send Clean Brief to Email & Website
-            send_email(web_content.strip())
-            update_web_article(web_content.strip()) # No more Social Hook on the site!
+            send_email(web_content)
+            update_web_article(web_content)
             
             # 3. Post Social Hook to Buffer
             site_url = "https://secintel.net/"
-            post_to_buffer(social_content.strip(), site_url)
+            post_to_buffer(social_content, site_url)
             
             print("[+] All tasks completed successfully.")
