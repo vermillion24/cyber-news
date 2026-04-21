@@ -99,29 +99,25 @@ def generate_article(articles):
         context_text += f"SOURCE: {a['source']}\nTITLE: {a['title']}\nSUMMARY: {a['description']}\nLINK: {a['link']}\n---\n"
     
     prompt = f"""
-    ROLE: You are a Senior Cyber Security Researcher and Technical Journalist.
+    ROLE: You are a Senior Cyber Security Researcher. 
     
-    TASK: Analyze the provided raw data and write a 'Daily Cyber Intelligence Brief' for a technical audience.
+    TASK: Write a 'Daily Cyber Intelligence Brief' based on the raw data below.
     
-    CONSTRAINTS:
-    - DO NOT use marketing fluff or "corporate speak."
-    - DO NOT summarize articles that are just product advertisements.
-    - FOCUS on vulnerabilities, exploits, patches, and threat actor activity.
-    - If a CVE ID is mentioned in the data, it MUST be included in the summary.
+    CRITICAL STYLE LOGIC:
+    - OMIT any vendor from the 'Vendor Security Watch' if there is no specific news or patch for them today. Do NOT say "No updates reported."
+    - DO NOT mention "the provided data," "the dataset," or "sources." Write as if you are reporting this news firsthand.
+    - Use clean Markdown. Use '###' for subheaders.
     
     STRUCTURE:
-    1. Main Headline: A single, high-impact headline for today's most critical news.
-    2. The Big Story: Select the most technically significant event. Write 3 detailed paragraphs explaining the vulnerability, who is at risk, and the technical mechanism of the threat.
-    3. Vendor Security Watch: Provide a bulleted list for updates from Cloudflare, Fortinet, Oracle, Cisco, and Microsoft. Each bullet should mention the specific product and the fix.
-    4. Critical Headlines: 3-5 short bullets on other notable security news.
-    5. Admin Priority List: A 'TL;DR' list of 3 specific actions (e.g., "Patch FortiOS to v7.x immediately").
-    
-    Also, provide a 'Social Hook' section at the end of your response. This should include:
-    -A catchy headline (no bolding).
-    -A 1-2 sentence 'juicy' summary of the most critical threat found today.
-    -End the response with the exact marker 'Social Hook:' followed by a juicy 2-sentence summary and 2 hashtags.
+    1. Main Headline: High-impact.
+    2. The Big Story: 3 technical paragraphs (Mechanism, Impact, Remediation).
+    3. Vendor Security Watch: Bullet points for specific fixes (only for vendors with active news).
+    4. Critical Headlines: 3-5 short bullets on other news.
+    5. Admin Priority List: 3 actionable steps.
 
-    RAW DATA FOR ANALYSIS:
+    (End the response with the marker '### Social Hook' followed by the catchy summary and hashtags.)
+
+    RAW DATA:
     {context_text}
     """
     for attempt in range(3):
@@ -298,31 +294,25 @@ def post_to_buffer(article_content, link):
             
 # --- MAIN EXECUTION ---
 if __name__ == "__main__":
-    # Get news
     news_items = fetch_all_sources()
     
-    if not news_items:
-        print("No news items found. Exiting.")
-    else:
-        print(f"[+] Collected {len(news_items)} total items.")
+    if news_items:
+        full_response = generate_article(news_items)
         
-        # Generate content (Gemini Call)
-        article = generate_article(news_items)
-        
-        if article:
-            send_email(article)
+        if full_response:
+            # 1. Split the content at the marker
+            if "### Social Hook" in full_response:
+                web_content, social_content = full_response.split("### Social Hook")
+            else:
+                web_content = full_response
+                social_content = "New Cyber Intelligence Briefing Available."
+
+            # 2. Send Clean Brief to Email & Website
+            send_email(web_content.strip())
+            update_web_article(web_content.strip()) # No more Social Hook on the site!
             
-            # Generate the Markdown
-            update_web_article(article)
-            
-            # Extract a dynamic title for the Tweet
-            lines = article.strip().split('\n')
-            dynamic_title = lines[0].replace('#', '').strip() # Cleans up Markdown headers
-            
-            # Post to Social via Buffer
+            # 3. Post Social Hook to Buffer
             site_url = "https://secintel.net/"
-            post_to_buffer(article, site_url)
+            post_to_buffer(social_content.strip(), site_url)
             
-            print("[+] All tasks completed successfully. Ready for deployment.")
-        else:
-            print("!!! Failed to generate article content.")
+            print("[+] All tasks completed successfully.")
