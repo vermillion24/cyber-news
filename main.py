@@ -11,7 +11,7 @@ from google import genai
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 # --- 1. CONFIGURATION & API KEYS ---
-load_dotenv()  # This loads the variables from .env into os.environ
+load_dotenv()
 NEWS_API_KEY = os.environ.get('NEWS_API_KEY')
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
@@ -21,7 +21,7 @@ TO_EMAIL = os.environ.get('TO_EMAIL')
 client = genai.Client(api_key=GEMINI_API_KEY)
 resend.api_key = RESEND_API_KEY
 
-# List of high-value Security RSS feeds
+# RSS feeds
 RSS_FEEDS = {
     "Cloudflare": "https://blog.cloudflare.com/rss/",
     "Fortinet": "https://www.fortinet.com/blog/rss-feeds/psirt-blogs.xml",
@@ -33,7 +33,7 @@ RSS_FEEDS = {
     "Krebs on Security": "https://krebsonsecurity.com/feed/"
 }
 
-# --- 2. NEW FEATURE: RESILIENT FETCHING ---
+# --- 2.FETCHING ---
 def get_safe_session():
     """Creates a session that automatically retries on temporary network failures."""
     session = requests.Session()
@@ -218,21 +218,29 @@ def update_web_article(content):
             "Content-Type": "application/json"
         }
         response = requests.post(API_URL, json=payload, headers=headers)
-        
-        # ── NEW: print exactly what the server says ──
+
+        #Debugging
         print(f"Status Code: {response.status_code}")
-        print(f"Response Body: {response.text[:1000]}")  # first 1000 chars
+        print(f"Response Body: {response.text[:1000]}")
         
         response.raise_for_status()
-        print("[+] Successfully posted to SecIntel Database!")
+        
+        # Get the ID sent back by the worker
+        result = response.json()
+        article_id = result.get('id')
+        
+        print(f"[+] Successfully posted! Article ID: {article_id}")
+        return article_id
+        
     except Exception as e:
         print(f"[-] Failed to update web database: {e}")
+        return None
 def post_to_buffer(article_content, link):
     """
     Post to social media through buffer schema
     """
     api_key = os.getenv("BUFFER_ACCESS_TOKEN")
-    channel_ids = ["6"] 
+    channel_ids = ["69d42ae6031bfa423cd7876f"] 
     endpoint = "https://api.buffer.com"
 
     clean_article = article_content.replace('**', '').replace('#', '').strip()
@@ -300,7 +308,7 @@ if __name__ == "__main__":
         full_response = generate_article(news_items)
         
         if full_response:
-            # Use maxsplit=1 to avoid "too many values to unpack"
+            # avoid "too many values to unpack"
             parts = full_response.split("### Social Hook", 1)
             
             if len(parts) == 2:
@@ -310,12 +318,15 @@ if __name__ == "__main__":
                 web_content = full_response.strip()
                 social_content = "Latest updates in Kenyan & Global Cyber Security."
 
-            # 2. Send Clean Brief to Email & Website
+                # 2. Upload to Website and GET the ID
+            article_id = update_web_article(web_content)
+            
+            if article_id:
+                article_url = f"https://secintel.net/resources?newsId={article_id}"
+            else:
+                article_url = "https://secintel.net/resources"
+            
             send_email(web_content)
-            update_web_article(web_content)
+            post_to_buffer(social_content, article_url)
             
-            # 3. Post Social Hook to Buffer
-            site_url = "https://secintel.net/"
-            post_to_buffer(social_content, site_url)
-            
-            print("[+] All tasks completed successfully.")
+            print(f"[+] All tasks completed. Posted to Social: {article_url}")
