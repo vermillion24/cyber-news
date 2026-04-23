@@ -240,7 +240,7 @@ def post_to_buffer(article_content, link):
     Post to social media through buffer schema
     """
     api_key = os.getenv("BUFFER_ACCESS_TOKEN")
-    channel_ids = ["69d42ae6031bfa423cd7876f"] 
+    channel_ids = ["69d42ae6031bfa423cd7876f","69e9f765031bfa423c349404"] 
     endpoint = "https://api.buffer.com"
 
     clean_article = article_content.replace('**', '').replace('#', '').strip()
